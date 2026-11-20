@@ -1,5 +1,5 @@
 # SIGIL.FORGE
-**Austin Osman Spare Sigil Method — Digital Implementation v1.0**
+**Morphystic sigil workshop — Phase 2**
 
 *"Morphysm arises from the refusal of the human as measure. It seeks to twist and corrupt the prison, to explore its cracks, and to force the system toward dissolution."*  
 — The Black Book of Morphysm
@@ -15,10 +15,12 @@ SIGIL.FORGE is a web-based implementation of Austin Osman Spare's sigilization t
 ## II. THE PROCESS
 
 ### 1. Intent Reduction (`[ EXECUTE.REDUCTION ]`)
-Enter your statement of intent. The system removes spaces and duplicate letters, following Spare's original method of distilling desire to its essential symbolic components.
+Enter a statement of intent. **Spare / Monogram** is the default. It retains the first occurrence of each normalized letter for construction. It uses native shapes for Latin, Icelandic, Cyrillic, kana and supported kanji. If the workshop cannot construct a character, it lists it and lets you edit the intent or choose **Legacy renderer (Unicode input)**. **Legacy Mode (original ASCII rules)** preserves the v1.0 reduction, including the `X` fallback.
 
 ### 2. Sigil Generation (`[ FORGE SIGIL ]`)
-The reduced letters are mapped to randomized coordinates on a canvas, creating a unique geometric form. The visual output uses high-contrast red (`#c70c0c`) on black to create a stark, memorable image. 
+In **Spare / Monogram**, the engine takes a spine, open arc, wedge, or bracket from the source letters and fits compatible strokes around it. Shared strokes are drawn once. **Generate variation** explores other silhouettes supported by the same letters. **Reveal construction** replays the stroke sequence. **Focus view** shows the settled mark. Export an SVG or a 2400 × 2400 PNG, with transparency or a dark background.
+
+The Legacy renderer draws the original random red polyline with the number of segments determined by the reduced letter count. Use **Download** to save the original 600 × 600 PNG.
 
 **Traditional charging methods apply:**
 - Download and print the sigil, then burn it to release the intent
@@ -26,15 +28,17 @@ The reduced letters are mapped to randomized coordinates on a canvas, creating a
 - Following Spare's doctrine, the sigil must be charged through focused attention and then banished from conscious memory to work at the subconscious level
 
 ### 3. Resonance Analysis (`[ ANALYZE.RESONANCE ]`)
-The unique letters are converted to numerical values (A=1, B=2... Z=26), summed, and mapped via modulo 22 to one of the Major Arcana. Each card has been reinterpreted through a Morphystic lens, offering a diagnostic reading of psychological patterns rather than fortune-telling.
+Intent reduced to A–Z uses the original sum of distinct letter values (A=1 through Z=26), modulo 22. With Unicode input, non-ASCII letters use 32-bit FNV-1a over the ordered normalized letters encoded as UTF-8, also modulo 22. Each sigil variant uses the same selected reading and cue. The interface language is independent of input.
+
+**Interface language** switches the controls and both Tarot reading editions between English, Japanese, Russian, and Icelandic. Each language includes all 22 cards.
 
 ---
 
 ## III. TECHNICAL NOTES
 
 ### Visual Design
-- **Atari 2600 / ZX Spectrum aesthetic**: Low-resolution (64×64) pixel canvas evokes early 1980s home computing limitations
-- **Mirrored composition**: X-axis symmetry evokes Rorschach-style psychological projection
+- **Atari 2600 / ZX Spectrum aesthetic**: The Tarot keeps its low-resolution 64 × 64 pixel canvas
+- **Mirrored Tarot composition**: Horizontal mirroring evokes Rorschach-style psychological projection
 - **VHS effects**: Flicker and scanline filters at 0.66s cycles create visual instability
 - **Glitch animations**: CSS transforms simulate cognitive disruption during the reveal
 
@@ -89,6 +93,30 @@ npm start
 5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ---
+
+## Phase 1 development
+
+The original application is preserved at commit `7722b72`. Phase 1 separates the original generator, Tarot selection, stable card metadata and language catalogs. It fixes asset paths via Create React App’s `PUBLIC_URL` and adds compatibility and workflow tests. The illustrated edition and expanded readings have a separate [Tarot redesign specification](TAROT_REDESIGN_SPEC.md).
+
+Run the tests from the repository root.
+
+```sh
+CI=true npm test -- --watchAll=false --runInBand
+```
+
+For a project subpath build, set its prefix before building.
+
+```sh
+PUBLIC_URL=/sigil-forge npm run build
+```
+
+## Phase 2 development
+
+The [Monogram implementation report](SIGIL_FORGE_2_PHASE_2.md) documents construction, glyph coverage, SVG and PNG rendering, and validation. The Japanese centerline data is derived from Noto Sans CJK JP Regular and is distributed under the [SIL Open Font License](public/licenses/japanese-centerlines-OFL.txt).
+
+## Phase 3 Tarot deck
+
+All 22 Major Arcana now have straight-line faces and expanded English readings in Monogram mode. For a quick check, enter `V` for The Fool, `P` for The Tower, or `U` for The World. Forge the sigil and choose **Analyze Resonance**. Open **Original reading** to compare with the original text. [Full deck contact sheet](art/tarot/pilot/stick-study/deck-contact-sheet.png), [art masters](art/tarot/pilot/README.md)
 
 ## VI. A WARNING ON OVERUSE
 

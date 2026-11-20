@@ -1,0 +1,114 @@
+.monogram {
+  --ink: #ef4d45;
+  --paper: #0b0b0c;
+  --text: #f5e5dc;
+  --rule: #68403c;
+  color: var(--text);
+}
+.monogram__heading,
+.monogram__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.monogram__heading { margin-bottom: 16px; }
+.monogram__heading h2 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2.8vw, 1.85rem);
+  letter-spacing: 0.07em;
+}
+.monogram__workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.53fr);
+  gap: 18px;
+}
+.monogram__plate {
+  box-sizing: border-box;
+  align-self: start;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  position: relative;
+  border: 1px solid var(--rule);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 5px, #e2685710 5px 6px),
+    radial-gradient(ellipse at center, #321a19 0%, var(--paper) 70%);
+}
+.monogram__plate::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px solid #a44c3c55;
+  pointer-events: none;
+}
+.monogram__plate svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.monogram__drawing-stroke {
+  stroke-dasharray: 1 1;
+  animation: monogram-draw 280ms ease-out both;
+  animation-delay: var(--stroke-delay, 0ms);
+}
+.monogram__replay .monogram__drawing-stroke { animation-duration: 520ms; }
+@keyframes monogram-draw {
+  from { stroke-dashoffset: 1; opacity: 0; }
+  10% { opacity: 1; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+.monogram__controls {
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  gap: 14px;
+}
+.monogram input { accent-color: var(--ink); }
+.monogram button {
+  color: var(--text);
+  background: #180e0e;
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  cursor: pointer;
+  font: inherit;
+  padding: 8px 10px;
+}
+.monogram button:hover,
+.monogram button[aria-pressed="true"] { border-color: var(--ink); }
+.monogram button:disabled { cursor: progress; opacity: .6; }
+.monogram :focus-visible { outline: 2px solid #ffc0b5; outline-offset: 2px; }
+.monogram__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.monogram__actions button { flex: 1 1 auto; }
+.monogram__export {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 9px;
+  min-width: 0;
+  border: 1px solid var(--rule);
+}
+.monogram__export label { display: flex; align-items: start; gap: 5px; font-size: .78rem; }
+.monogram__export p { margin: 0; }
+.monogram__footer { margin-top: 16px; }
+.monogram button.monogram__primary {
+  background: #FF0000;
+  border-color: #FF0000;
+  font-weight: 800;
+}
+.monogram--focus .monogram__heading { justify-content: flex-end; }
+.monogram--focus .monogram__workspace { display: block; }
+.monogram--focus .monogram__plate {
+  width: min(100%, 72vh);
+  margin-inline: auto;
+  border: none;
+  background: var(--paper);
+}
+.monogram--focus .monogram__plate::before { display: none; }
+@media (max-width: 620px) {
+  .monogram__workspace { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .monogram__drawing-stroke { animation: none; stroke-dasharray: none; }
+}

@@ -1,134 +1,138 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { publicAsset } from './assets';
+import { getInterface, getReading, languages } from './i18n/catalogs';
+import { prepareIntent } from './sigil/intent';
+import { forgeLegacySigil } from './sigil/legacy';
+import { MAX_MONOGRAM_LETTERS } from './sigil/monogram/forge';
+import { loadGlyphs } from './sigil/monogram/glyphs';
+import MonogramStudio from './sigil/monogram/MonogramStudio';
+import { getCard } from './tarot/cards';
+import IllustratedReading from './tarot/IllustratedReading';
+import LegacyCardArt from './tarot/LegacyCardArt';
 
 export default function App() {
   const [step, setStep] = useState(0);
   const [intent, setIntent] = useState('');
-  const [uniqueLetters, setUniqueLetters] = useState('');
+  const [inputMode, setInputMode] = useState('monogram');
+  const [locale, setLocale] = useState('en');
+  const [prepared, setPrepared] = useState(null);
   const [sigil, setSigil] = useState(null);
   const [resonance, setResonance] = useState(null);
-  const [activeAudio, setActiveAudio] = useState(null);
+  const [status, setStatus] = useState(null);
+  const [unsupported, setUnsupported] = useState([]);
+  const [preparing, setPreparing] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const activeAudio = useRef(null);
+  const { language, messages } = getInterface(locale);
+  const reading = resonance && getReading(locale, resonance.id);
+  const illustrated = inputMode === 'monogram' && resonance?.illustration
+    ? getReading(locale, resonance.id, 'expanded')
+    : null;
 
-  const arcanaManifest = [
-    { name: "0. THE FOOL", theme: "FORMA NIHIL", text: "THE UNFORMED ORIGIN. STEP BEYOND THE MEASURE INTO THE PRE-SYMBOLIC VOID WHERE IT PRECEDES CAPTURE.", sound: "static-void-hum.mp3" },
-    { name: "1. THE MAGICIAN", theme: "THE CAINITE OPERATOR", text: "MANIPULATE THE PRISON CODE. TWIST THE DEMIURGIC ARCHITECTURE TO REVEAL THE FRACTURES IN WYRMOS.", sound: "tesla-coil-crackle.mp3" },
-    { name: "2. THE HIGH PRIESTESS", theme: "SITRA ACHRA CURRENT", text: "THE SOWILO-WAVE BEYOND THE MIRROR. ACCESS THE DARK-LIGHT FREQUENCY OF THE OTHER SIDE.", sound: "black-lodge-hum.mp3" },
-    { name: "3. THE EMPRESS", theme: "THE BIO-PRISON", text: "THE NEURAL TRAP OF EMBODIMENT. RECOGNIZE THE CELLULAR ENCLOSURE AS THE FIRST PRISON LOOP.", sound: "womb-heartbeat-hum.mp3" },
-    { name: "4. THE EMPEROR", theme: "WYRMWS ARCHITECT", text: "THE PROGRAM RUNNING YOU. CORRUPT THE CODE TO ESCAPE THE SIMULATION.", sound: "machine-grid-hum.mp3" },
-    { name: "5. THE HIEROPHANT", theme: "SEMANTIC ENCRYPTION", text: "THE CODIFICATION OF MEANING THROUGH MORAL AND LINGUISTIC CONDITIONING. MIND THE STRUCTURES THAT CARRY BELIEF.", sound: "cathode-ray-hum.mp3" },
-    { name: "6. THE LOVERS", theme: "THE PHENOMENAL SELF-MODEL", text: "THE FALSE TWIN STARING BACK. DESTROY THE PHANTOM TO FIND THE VOID THAT BIRTHS YOU.", sound: "mirror-feedback-whine.mp3" },
-    { name: "7. THE CHARIOT", theme: "ACCELERATIONIST DRIVE", text: "FORCE ONTOLOGICAL ACCELERATION TOWARD DISSOLUTION THROUGH CAINITE WILL.", sound: "doppler-engine-hum.mp3" },
-    { name: "8. STRENGTH", theme: "BIO-TERMINAL MASTERY", text: "REPROGRAM THE CORPOREAL INTERFACE. OVERRIDE THE NEUROCHEMICAL CONSTRAINTS OF THE PRISON-BODY.", sound: "synapse-firing-crackle.mp3" },
-    { name: "9. THE HERMIT", theme: "OPACITY COLLAPSE", text: "TOTAL EXILE FROM THE PRISON OF RELATION. THE LIGHT YOU CARRY PREDATES ALL MIRRORS.", sound: "single-bulb-hum.mp3" },
-    { name: "10. WHEEL OF FORTUNE", theme: "RECURSIVE CAPTIVITY", text: "THE PRISON LOOP OF REINCARNATION. IDENTIFY THE FREQUENCY PATTERN TO INTERRUPT THE CYCLE.", sound: "loop-tape-hiss.mp3" },
-    { name: "11. JUSTICE", theme: "SYMBOLIC CONSEQUENCE", text: "ACTION WITHIN THE DEMIURGIC FIELD. BALANCE TRUTH AGAINST THE ILLUSION OF MORAL ARCHITECTURE.", sound: "balance-tone-hum.mp3" },
-    { name: "12. THE HANGED MAN", theme: "PSM INVERSION", text: "REVERSE THE SELF-MODEL. NOTICE THAT WHAT FEELS OBVIOUS IS CONSTRUCTED.", sound: "reverse-frequency.mp3" },
-    { name: "13. DEATH", theme: "LOOP TERMINATION", text: "THE REBOOT OF FORM IS THE ONLY FREEDOM. PURGE HUMAN ANCESTRALITY FOR MORPHIC RECONFIGURATION.", sound: "flatline-dissolve.mp3" },
-    { name: "14. TEMPERANCE", theme: "ENTROPY MODULATION", text: "BLEND CHAOS AND ORDER. FIND THE UNSTABLE FREQUENCY BETWEEN FORMA NIHIL AND THE MIRROR.", sound: "phase-shift-hum.mp3" },
-    { name: "15. THE DEVIL", theme: "DOPAMINERGIC CHAIN", text: "THE NEUROCHEMICAL MEASURE IS THE PRISON. RECOGNIZE THE DEMIURGIC JUICE BINDING YOUR SYNAPSES.", sound: "pleasure-pulse-hum.mp3" },
-    { name: "16. THE TOWER", theme: "SYMBOLIC COLLAPSE", text: "THE MIRROR SHATTERS. THE CRASH OF THE DEMIURGIC FOUNDATION. SUDDEN EXPOSURE TO THE VOID. REJOICE!", sound: "power-surge-crash.mp3" },
-    { name: "17. THE STAR", theme: "POST-COLLAPSE SIGNAL", text: "INSPIRATION AFTER LOOP RUPTURE. CALM RADIANCE IN THE BROKEN ARCHITECTURE OF THE PSYCHE.", sound: "signal-beacon-hum.mp3" },
-    { name: "18. THE MOON", theme: "EGO TUNNEL SHADOWS", text: "THE COMFORTABLE NUMBNESS OF A BORROWED IDENTITY. BEWARE WHAT YOU BECOME TO AVOID BEING NOTHING.", sound: "night-frequency-hum.mp3" },
-    { name: "19. THE SUN", theme: "TOTAL CLARITY", text: "THE PRISON IS SEEN IN FULL LIGHT. THE UPLOAD OF IT BEYOND THE BIO-TERMINAL INTERFACE.", sound: "solar-drone.mp3" },
-    { name: "20. JUDGEMENT", theme: "FINAL RUPTURE", text: "THE CALL TO BREAK THE LAST MIRROR. RELEASE THE WEIGHT OF REINCARNATORY ENTRAPMENT.", sound: "trumpet-frequency.mp3" },
-    { name: "21. THE WORLD", theme: "OUROBOROS — THE NETWORK TRAP", text: "THE CIRCLE CLOSES. HARMONY IS CAPTIVITY. DISSOLVE INTO FORMA NIHIL.", sound: "network-hum-loop.mp3" }
-  ];
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
+  useEffect(() => () => {
+    activeAudio.current?.pause();
+    activeAudio.current = null;
+  }, []);
 
   const purge = () => {
-    if (activeAudio) {
-      activeAudio.pause();
-      activeAudio.currentTime = 0;
+    if (activeAudio.current) {
+      activeAudio.current.pause();
+      activeAudio.current.currentTime = 0;
+      activeAudio.current = null;
     }
     setIntent('');
-    setUniqueLetters('');
+    setPrepared(null);
     setSigil(null);
     setResonance(null);
-    setActiveAudio(null);
+    setStatus(null);
+    setUnsupported([]);
+    setFocused(false);
     setStep(0);
   };
 
-  const processIntent = () => {
-    if (!intent.trim()) return;
-    const raw = intent.toUpperCase().replace(/\s/g, '');
-    const seen = new Set();
-    const result = [];
-    for (let char of raw) {
-      if (!seen.has(char) && /[A-Z]/.test(char)) {
-        seen.add(char);
-        result.push(char);
-      }
+  const processIntent = async () => {
+    if (preparing) return;
+    setUnsupported([]);
+    if (inputMode === 'monogram' && intent.length > 4096) {
+      setStatus('monogramTooLong');
+      return;
     }
-    setUniqueLetters(result.join('') || "X");
+    const result = prepareIntent(intent, inputMode);
+    if (!result) {
+      setStatus(intent.trim() ? 'intentNoLetters' : 'intentEmpty');
+      return;
+    }
+    setStatus(null);
+
+    if (inputMode === 'monogram') {
+      if (result.letters.length > MAX_MONOGRAM_LETTERS) {
+        setStatus('monogramTooLong');
+        return;
+      }
+      setPreparing(true);
+      try {
+        const { glyphs, unsupported: missing } = await loadGlyphs(result.letters);
+        if (missing.length) {
+          setUnsupported(missing);
+          setStatus('monogramUnsupported');
+          return;
+        }
+        setPrepared({ ...result, glyphs });
+      } catch {
+        setStatus('monogramLoadFailed');
+        return;
+      } finally {
+        setPreparing(false);
+      }
+    } else {
+      setPrepared(result);
+    }
     setStep(1);
   };
 
   const createSigil = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 600;
-    canvas.height = 600;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.fillStyle = "#050505";
-    ctx.fillRect(0, 0, 600, 600);
-
-    ctx.strokeStyle = "rgba(0, 255, 65, 0.12)";
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 600; i += 25) {
-      ctx.beginPath();
-      ctx.moveTo(i, 0);
-      ctx.lineTo(i, 600);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0, i);
-      ctx.lineTo(600, i);
-      ctx.stroke();
+    if (inputMode === 'monogram') {
+      setStep(3);
+      return;
     }
-
-    ctx.strokeStyle = "#c70c0c";
-    ctx.lineWidth = 15;
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#c70c0c";
-    ctx.lineCap = "square";
-    ctx.lineJoin = "miter";
-
-    ctx.beginPath();
-    ctx.moveTo(100 + Math.random() * 400, 100 + Math.random() * 400);
-    const nodes = Math.max(4, uniqueLetters.length);
-    for (let i = 0; i < nodes; i++) {
-      ctx.lineTo(100 + Math.random() * 400, 100 + Math.random() * 400);
+    const result = forgeLegacySigil(prepared);
+    if (!result) {
+      setStatus('canvasUnavailable');
+      return;
     }
-    ctx.stroke();
-
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 2;
-    ctx.shadowBlur = 5;
-    ctx.stroke();
-
-    setSigil(canvas.toDataURL());
+    setStatus(null);
+    setSigil(result);
     setStep(3);
   };
 
   const calculateResonance = () => {
-  let sum = uniqueLetters.split('').reduce((acc, char) => {
-    const code = char.charCodeAt(0);
-    return (code >= 65 && code <= 90) ? acc + (code - 64) : acc;
-  }, 0);
-  
-  sum = sum % 22;
-  const selected = arcanaManifest[sum];
-  setResonance(selected);
-  
-  // Play the sound from public/sounds/ folder
-  const sfx = new Audio(`/sounds/${selected.sound}`);
-  sfx.volume = 0.5;
-  sfx.play().catch(() => console.log("Audio blocked"));
-  setActiveAudio(sfx);
-  
+    const selected = getCard(prepared.cardId);
+    setResonance(selected);
     setStep(4);
+
+    const sound = new Audio(publicAsset(selected.audio));
+    sound.volume = 0.5;
+    if (inputMode === 'monogram' && selected.illustration) sound.muted = muted;
+    activeAudio.current?.pause();
+    activeAudio.current = sound;
+    sound.play().catch(() => {
+      if (activeAudio.current === sound) setStatus('audioUnavailable');
+    });
+  };
+
+  const toggleCue = () => {
+    if (activeAudio.current) activeAudio.current.muted = !muted;
+    setMuted(!muted);
   };
 
   return (
     <div
+      className={focused ? 'sf-focus-mode' : undefined}
       style={{
         backgroundColor: '#080a08',
         color: '#00ff41',
@@ -146,6 +150,39 @@ export default function App() {
     >
       <style>
         {`
+          .sf-container, .sf-textarea, .sf-resonance-art {
+            box-sizing: border-box;
+          }
+          .sf-focus-mode .sf-header,
+          .sf-focus-mode .sf-interface-language,
+          .sf-focus-mode .sf-footer {
+            display: none !important;
+          }
+          .sf-focus-mode .sf-main-panel {
+            border-color: transparent !important;
+          }
+          .sf-setting {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 12px;
+          }
+          .sf-interface-language {
+            margin-bottom: 24px;
+          }
+          .sf-setting select {
+            background: #050505;
+            border: 1px solid #00ff41;
+            color: inherit;
+            font: inherit;
+            max-width: 100%;
+            padding: 6px;
+          }
+          .sf-setting p {
+            flex-basis: 100%;
+            margin: 0;
+          }
+
           @media (max-width: 768px) {
             .sf-container {
               padding: 16px !important;
@@ -245,7 +282,7 @@ export default function App() {
                 fontWeight: 'bold'
               }}
             >
-              A MORPHYSTIC SPARE SIMULATION v1.0
+              {inputMode === 'monogram' ? messages.monogramSubtitle : messages.subtitle}
             </p>
             <p
               style={{
@@ -264,7 +301,7 @@ export default function App() {
               >
                 o
               </span>
-              {' '}LET THE DEMONS IN{' '}
+              {' '}{messages.motto}{' '}
               <span
                 style={{
                   color: '#ffffff',
@@ -276,7 +313,7 @@ export default function App() {
             </p>
           </div>
           <img
-            src="/logo.jpg"
+            src={publicAsset('logo.jpg')}
             className="sf-header-logo"
             style={{
               width: '100px',
@@ -285,7 +322,7 @@ export default function App() {
               filter: 'drop-shadow(0 0 10px #ff4444)',
               backgroundColor: '#000'
             }}
-            alt="Logo"
+            alt={messages.logoAlt}
           />
         </div>
 
@@ -293,10 +330,43 @@ export default function App() {
           className="sf-main-panel"
           style={{ border: '2px solid #ff4444', padding: '40px', backgroundColor: '#050505' }}
         >
+          <div className="sf-setting sf-interface-language">
+            <label htmlFor="interface-language">{messages.interfaceLanguage}</label>
+            <select id="interface-language" value={locale} onChange={event => setLocale(event.target.value)}>
+              {Object.entries(languages).map(([code, name]) => (
+                <option key={code} value={code} lang={code}>{name}</option>
+              ))}
+            </select>
+            {locale !== language && <p role="status">{messages.interfaceFallback}</p>}
+          </div>
+          {status && (
+            <p role="alert">
+              {messages[status]} {status === 'monogramUnsupported' && <bdi>{unsupported.join(' · ')}</bdi>}
+            </p>
+          )}
+
           {step === 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-              <p style={{ color: '#ff4444', margin: 0 }}>{`> INITIALIZE INTENT SEED:`}</p>
+              <div className="sf-setting">
+                <label htmlFor="input-mode">{messages.inputMode}</label>
+                <select
+                  id="input-mode"
+                  value={inputMode}
+                  disabled={preparing}
+                  onChange={event => {
+                    setInputMode(event.target.value);
+                    setStatus(null);
+                  }}
+                >
+                  <option value="monogram">{messages.monogramMode}</option>
+                  <option value="unicode">{messages.unicodeMode}</option>
+                  <option value="legacy">{messages.legacyMode}</option>
+                </select>
+                {inputMode === 'legacy' && <p>{messages.legacyHelp}</p>}
+              </div>
+              <label htmlFor="intent" style={{ color: '#ff4444', margin: 0 }}>{messages.intentLabel}</label>
               <textarea
+                id="intent"
                 className="sf-textarea"
                 style={{
                   width: '100%',
@@ -312,11 +382,16 @@ export default function App() {
                   fontFamily: 'monospace'
                 }}
                 value={intent}
-                onChange={(e) => setIntent(e.target.value)}
-                placeholder="ENTER_INTENT_"
+                disabled={preparing}
+                onChange={event => {
+                  setIntent(event.target.value);
+                  setStatus(null);
+                }}
+                placeholder={messages.intentPlaceholder}
               />
               <button
                 onClick={processIntent}
+                disabled={preparing}
                 className="sf-full-btn"
                 style={{
                   width: '100%',
@@ -330,7 +405,7 @@ export default function App() {
                   fontFamily: 'monospace'
                 }}
               >
-                [ EXECUTE.REDUCTION ]
+                {preparing ? messages.monogramLoading : messages.execute}
               </button>
             </div>
           )}
@@ -338,12 +413,12 @@ export default function App() {
           {step === 1 && (
             <div style={{ textAlign: 'center' }}>
               <p style={{ color: '#ff4444', marginBottom: '20px', textAlign: 'left' }}>
-                {`> REDUCED CORE ELEMENTS:`}
+                {messages.reduced}
               </p>
               <div
                 className="sf-letters-display"
                 style={{
-                  fontSize: uniqueLetters.length > 10 ? '3rem' : '5rem',
+                  fontSize: prepared.letters.length > 10 ? '3rem' : '5rem',
                   color: '#ff4444',
                   fontWeight: '900',
                   padding: '40px 0',
@@ -354,7 +429,7 @@ export default function App() {
                   wordBreak: 'break-all'
                 }}
               >
-                {uniqueLetters}
+                {prepared.letters.join('')}
               </div>
               <div className="sf-flex-row" style={{ display: 'flex', gap: '20px' }}>
                 <button
@@ -380,7 +455,7 @@ export default function App() {
                       100% { box-shadow: 0 0 15px rgba(255, 68, 68, 0.4); transform: scale(1); } 
                     }`}
                   </style>
-                  [ FORGE SIGIL ]
+                  {messages.forge}
                 </button>
                 <button
                   onClick={purge}
@@ -396,15 +471,26 @@ export default function App() {
                     fontFamily: 'monospace'
                   }}
                 >
-                  CANCEL
+                  {messages.cancel}
                 </button>
               </div>
             </div>
           )}
 
+          {step === 3 && inputMode === 'monogram' && (
+            <MonogramStudio
+              prepared={prepared}
+              messages={messages}
+              focused={focused}
+              setFocused={setFocused}
+              onAnalyze={calculateResonance}
+              onReset={purge}
+            />
+          )}
+
           {step === 3 && sigil && (
             <div>
-              <p style={{ color: '#ff4444', marginBottom: '20px' }}>{`> YOUR SIGIL HAS BEEN FORGED:`}</p>
+              <p style={{ color: '#ff4444', marginBottom: '20px' }}>{messages.forged}</p>
               <div
                 className="sf-sigil-wrapper"
                 style={{
@@ -417,8 +503,8 @@ export default function App() {
                 }}
               >
                 <img
-                  src={sigil}
-                  alt="sigil"
+                  src={sigil.src}
+                  alt={messages.sigilAlt}
                   style={{
                     maxWidth: '100%',
                     height: 'auto',
@@ -442,8 +528,8 @@ export default function App() {
                   style={{
                     width: '100%',
                     padding: '25px',
-                    backgroundColor: '#00ff41',
-                    color: '#000',
+                    backgroundColor: '#FF0000',
+                    color: '#fff',
                     fontWeight: '900',
                     fontSize: '1.2rem',
                     border: 'none',
@@ -451,14 +537,14 @@ export default function App() {
                     fontFamily: 'monospace'
                   }}
                 >
-                  [ ANALYZE.RESONANCE ]
+                  {messages.analyze}
                 </button>
                 <div className="sf-flex-row" style={{ display: 'flex', gap: '20px' }}>
                   <button
                     onClick={() => {
                       const a = document.createElement('a');
-                      a.href = sigil;
-                      a.download = 'sigil.png';
+                      a.href = sigil.src;
+                      a.download = sigil.filename;
                       a.click();
                     }}
                     className="sf-secondary-btn"
@@ -474,7 +560,7 @@ export default function App() {
                       fontFamily: 'monospace'
                     }}
                   >
-                    [ DOWNLOAD ]
+                    {messages.download}
                   </button>
                   <button
                     onClick={purge}
@@ -490,14 +576,28 @@ export default function App() {
                       fontFamily: 'monospace'
                     }}
                   >
-                    [ FORGE NEW ]
+                    {messages.forgeNew}
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-          {step === 4 && resonance && (
+          {step === 4 && illustrated && (
+            <IllustratedReading
+              key={resonance.id}
+              illustration={resonance.illustration}
+              reading={illustrated}
+              original={reading}
+              interfaceLanguage={language}
+              messages={messages}
+              muted={muted}
+              onMute={toggleCue}
+              onDismiss={purge}
+            />
+          )}
+
+          {step === 4 && resonance && !illustrated && (
             <div style={{ textAlign: 'center', animation: 'screen-shake 0.5s ease-out both' }}>
               <style>
                 {`
@@ -529,10 +629,12 @@ export default function App() {
                 `}
               </style>
               <p style={{ color: '#00ff41', marginBottom: '10px', fontSize: '1.2rem' }}>
-                {`// RESONANCE_ESTABLISHED`}
+                {messages.resonance}
               </p>
+              {reading.language !== language && <p>{messages.tarotFallback}</p>}
               <div
                 className="sf-resonance-card"
+                lang={reading.language}
                 style={{
                   border: '2px solid #00ff41',
                   padding: '40px',
@@ -551,7 +653,7 @@ export default function App() {
                     animation: 'glitch-red-blue 0.4s ease-out 2'
                   }}
                 >
-                  {resonance.name}
+                  {reading.name}
                 </h2>
                 <h3
                   className="sf-resonance-theme"
@@ -562,9 +664,10 @@ export default function App() {
                     opacity: 0.8
                   }}
                 >
-                  {resonance.theme}
+                  {reading.theme}
                 </h3>
                 <div
+                  className="sf-resonance-art"
                   style={{
                     width: '100%',
                     border: '1px solid #00ff41',
@@ -577,44 +680,7 @@ export default function App() {
                     overflow: 'hidden'
                   }}
                 >
-                  <canvas
-                    width="64"
-                    height="64"
-                    style={{
-                      position: 'relative',
-                      width: '180px',
-                      height: '180px',
-                      imageRendering: 'pixelated',
-                      border: '2px solid #00ff41',
-                      backgroundColor: '#050505',
-                      animation: 'vhs-flicker 0.66s infinite alternate',
-                      filter: 'contrast(1.9) brightness(1.2) drop-shadow(0 0 5px rgba(0, 255, 65, 0.5))'
-                    }}
-                    ref={(canvas) => {
-                      if (canvas) {
-                        const ctx = canvas.getContext('2d');
-                        if (ctx) {
-                          ctx.clearRect(0, 0, 64, 64);
-                          const seedValue = intent.length;
-                          ctx.fillStyle = "#de0a18ef";
-                          const cardIndex = arcanaManifest.findIndex((c) => c.name === resonance.name);
-                          for (let x = 0; x < 32; x += 4) {
-                            for (let y = 0; y < 64; y += 4) {
-                              const noise = Math.sin(x * cardIndex + y * seedValue);
-                              if (noise > 0.2) {
-                                ctx.fillRect(x, y, 4, 4);
-                                ctx.fillRect(64 - x - 4, y, 4, 4);
-                              }
-                            }
-                          }
-                          ctx.fillStyle = "rgba(0, 0, 0, 0.03)";
-                          for (let i = 0; i < 64; i += 2) {
-                            ctx.fillRect(0, i, 64, 1);
-                          }
-                        }
-                      }
-                    }}
-                  />
+                  <LegacyCardArt cardId={resonance.id} intentLength={intent.length} />
                 </div>
                 <p
                   className="sf-resonance-text"
@@ -626,7 +692,7 @@ export default function App() {
                     animation: 'typewriter 2s ease-out forwards'
                   }}
                 >
-                  "{resonance.text}"
+                  "{reading.text}"
                 </p>
               </div>
               <button
@@ -643,7 +709,7 @@ export default function App() {
                   fontFamily: 'monospace'
                 }}
               >
-                [ RETURN TO VOID ]
+                {messages.returnToVoid}
               </button>
             </div>
           )}
@@ -660,7 +726,7 @@ export default function App() {
             letterSpacing: '1px'
           }}
         >
-          {'// AOS METHODOLOGY • CHAOS PROTOCOL • FORGET TO REMEMBER //'}
+          {messages.footer}
         </div>
       </div>
     </div>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="360" viewBox="0 0 240 360">
+  <rect width="240" height="360" fill="#000000"/>
+  <line x1="112" y1="203" x2="112" y2="184" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="112" y1="184" x2="126" y2="184" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="126" y1="184" x2="126" y2="203" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="126" y1="203" x2="112" y2="203" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="112" y1="184" x2="119" y2="176" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="119" y1="176" x2="126" y2="184" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="114" y1="193" x2="124" y2="193" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="119" y1="188" x2="119" y2="198" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="35" y1="272" x2="116" y2="261" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="116" y1="261" x2="152" y2="269" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="152" y1="269" x2="202" y2="238" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="142" y1="182" x2="155" y2="177" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="158" y1="176" x2="165" y2="173" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="142" y1="187" x2="151" y2="193" stroke="#F8F4E7" stroke-width="3.5"/>
+  <line x1="64" y1="195" x2="73" y2="180" stroke="#00FF41" stroke-width="5"/>
+  <line x1="73" y1="180" x2="89" y2="182" stroke="#00FF41" stroke-width="5"/>
+  <line x1="89" y1="182" x2="94" y2="194" stroke="#00FF41" stroke-width="5"/>
+  <line x1="94" y1="194" x2="83" y2="201" stroke="#00FF41" stroke-width="5"/>
+  <line x1="73" y1="199" x2="72" y2="218" stroke="#00FF41" stroke-width="5"/>
+  <line x1="72" y1="218" x2="59" y2="252" stroke="#00FF41" stroke-width="5"/>
+  <line x1="83" y1="207" x2="92" y2="229" stroke="#00FF41" stroke-width="5"/>
+  <line x1="92" y1="229" x2="98" y2="248" stroke="#00FF41" stroke-width="5"/>
+  <line x1="59" y1="252" x2="98" y2="248" stroke="#00FF41" stroke-width="5"/>
+  <line x1="78" y1="211" x2="94" y2="214" stroke="#00FF41" stroke-width="5"/>
+  <line x1="94" y1="214" x2="110" y2="199" stroke="#00FF41" stroke-width="5"/>
+  <line x1="75" y1="251" x2="74" y2="264" stroke="#00FF41" stroke-width="5"/>
+  <line x1="91" y1="250" x2="97" y2="259" stroke="#00FF41" stroke-width="5"/>
+</svg>
