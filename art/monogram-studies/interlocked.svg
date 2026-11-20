@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 224 248" width="224" height="248">
+<title>LETSIFWORK — Interlocked</title>
+<g fill="none" stroke="#FF0000" stroke-linejoin="round" stroke-linecap="round">
+<path stroke-width="2.8" d="M84 52V188H159"/>
+<path stroke-width="2.1" d="M52 68H167 M84 123H174"/>
+<path stroke-width="2.1" d="M84 68C144 48 171 75 155 99S114 123 84 123"/>
+<path stroke-width="2.1" d="M155 99C143 111 116 87 106 105S142 128 132 147C128 155 122 159 115 162"/>
+<path stroke-width="2.1" d="M51 113L84 188 109 130 140 188 174 123"/>
+</g>
+</svg>

@@ -87,12 +87,12 @@ test('a 19-letter intention retains its wave, zigzag and closed loop across all 
     const result = generate(intent, { form: 0, variant });
     const [frame] = result.paths;
     const frameVertices = vertices(frame);
-    const attributableTo = letter => result.paths.find(({ sources }) => (
-      sources.length === 1 && result.letters[sources[0]] === letter
+    const attributableTo = (letter, count) => result.paths.find(path => (
+      path.sources.includes(result.letters.indexOf(letter)) && vertices(path).length === count
     ));
-    const wave = vertices(attributableTo('S'));
-    const zigzag = vertices(attributableTo('M'));
-    const loop = vertices(attributableTo('O'));
+    const wave = vertices(attributableTo('S', 12));
+    const zigzag = vertices(attributableTo('M', 5));
+    const loop = vertices(attributableTo('O', 11));
 
     expect(wave).toHaveLength(12);
     expect(zigzag).toHaveLength(5);
@@ -219,8 +219,8 @@ test('LETSIAGNRDO retains the S turn and closed O with every stroke joined', () 
   }
 });
 
-test('LETSIFWORK keeps its S curve, W bends and O loop in every frame', () => {
-  for (let variant = 0; variant < 4; variant++) {
+test('LETSIFWORK keeps its S curve, W bends and O loop in the alternate frames', () => {
+  for (let variant = 1; variant < 4; variant++) {
     const result = generate('LETSIFWORK', { form: 0, variant });
     const vertices = path => path.d.slice(1).split('L');
     const frame = new Set(vertices(result.paths[0]));
@@ -243,4 +243,38 @@ test('the L pen stroke supplies the shared upright and foot of LETSIFWORK', () =
   const foot = points.filter(([, y]) => y === points.at(-1)[1]);
   expect(foot.length).toBeGreaterThanOrEqual(2);
   expect(Math.abs(foot[0][0] - foot.at(-1)[0])).toBeGreaterThan(100);
+});
+
+test.each(['LETSIFWORK'])('the interlocked %s shares the bowl closure and both W feet', intent => {
+  const result = generate(intent, { form: 0 });
+  const [spine, bowl, zigzag] = result.paths.map(path => path.d.slice(1).split('L'));
+  expect([bowl[0], bowl.at(-1)]).toEqual(spine.slice(1, 3));
+  expect([zigzag[1], zigzag[3]]).toEqual(spine.slice(3, 5));
+  checkPaths(result);
+});
+
+test('related intentions and later variations change the actual pen construction', () => {
+  // Ignore coordinates while retaining the order of pen joints on the lead stroke.
+  const structure = result => {
+    const vertices = d => d.slice(1).split('L');
+    const outline = vertices(result.paths[0].d);
+    return JSON.stringify(result.paths.map(({ d, sources }) => [
+      vertices(d).length, sources.map(index => result.letters[index]).sort().join(''),
+      vertices(d).map(point => outline.indexOf(point)),
+    ]));
+  };
+  const sketch = (intent, variant = 0) => generate(intent, { form: 0, variant });
+  const words = ['FLOW', 'WOLF', 'FLOWER'];
+  expect(new Set(words.map(word => structure(sketch(word)))).size).toBe(3);
+  expect(structure(sketch('LETSIFWORK', 4))).not.toEqual(structure(sketch('LETSIFWORK')));
+  const sequence = Array.from({ length: 8 }, (_, i) => structure(sketch('FLOWER', i)));
+  expect(new Set(sequence).size).toBeGreaterThan(4);
+  expect(sketch('FLOWER', 6)).toEqual(sketch('FLOWER', 6));
+});
+
+test('FLOW uses three pen strokes with all four letters accounted for', () => {
+  const drawing = generate('FLOW');
+  expect(drawing.paths).toHaveLength(3);
+  expect(drawing.paths.some(({ sources }) => sources.length >= 2)).toBe(true);
+  checkPaths(drawing);
 });

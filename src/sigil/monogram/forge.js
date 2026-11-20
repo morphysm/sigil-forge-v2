@@ -80,8 +80,8 @@ function composePaths(strokes, form, random) {
 export function forgeMonogram(glyphs, { seed = '', variant = 0, form = 0.44, intricacy = 0.5 } = {}) {
   if (!glyphs.length || glyphs.length > MAX_MONOGRAM_LETTERS) return null;
   const letters = glyphs.map(({ letter }) => letter);
-  const random = seededRandom(JSON.stringify(['monogram-v2', letters, seed]));
   const revision = Number.isSafeInteger(variant) && variant >= 0 ? variant : 0;
+  const random = seededRandom(JSON.stringify(['monogram-drawing', letters, seed, revision]));
   const organic = Number.isFinite(form) ? clamp(form, 0, 1) : 0.44;
   const detail = Number.isFinite(intricacy) ? clamp(intricacy, 0, 1) : 0.5;
   const strokes = glyphs.length === 1
