@@ -264,7 +264,7 @@ function attach(points, joint, cross) {
     length(point, joint) < length(closest, joint) ? point : closest
   ));
   const [dx, dy] = joint.map((value, axis) => value - contact[axis]);
-  return points.map(point => point === contact
+  return points.map(point => length(point, contact) < 0.000001
     ? joint
     : [point[0] + dx * 0.32, point[1] + dy * 0.32]);
 }
@@ -276,8 +276,28 @@ function withJoints(outline, joints) {
   ]);
 }
 
+function nearestJoint(points, outline) {
+  let bestDistance = Infinity;
+  let best;
+  for (let i = 0; i < outline.length - 1; i++) {
+    const [x, y] = outline[i];
+    const dx = outline[i + 1][0] - x;
+    const dy = outline[i + 1][1] - y;
+    for (const point of points) {
+      const fraction = Math.max(0, Math.min(1,
+        ((point[0] - x) * dx + (point[1] - y) * dy) / (dx * dx + dy * dy)));
+      const gap = length(point, interpolate(outline[i], outline[i + 1], fraction));
+      if (gap < bestDistance) {
+        bestDistance = gap;
+        best = [i, fraction];
+      }
+    }
+  }
+  return best;
+}
+
 function attachToOutline(points, slot, outline, joints) {
-  const [segment, fraction] = slot.joint;
+  const [segment, fraction] = slot.joint ?? nearestJoint(points, outline);
   const point = interpolate(outline[segment], outline[segment + 1], fraction);
   if (fraction > 0 && fraction < 1) {
     if (!joints.has(segment)) joints.set(segment, []);
@@ -288,7 +308,7 @@ function attachToOutline(points, slot, outline, joints) {
 
 function extraStrokes(profiles, occupiedKinds, slots, detail, available) {
   // More letters can share the same outline without losing their distinctive turns.
-  const count = Math.min(available, slots.length, Math.floor((profiles.length - 6) / 3), Math.ceil(detail * 6));
+  const count = Math.min(available, slots.length, Math.floor((profiles.length - 4) / 3), Math.ceil(detail * 6));
   if (count <= 0) return [];
 
   const motifs = ['wave', 'zigzag', 'loop'].flatMap((kind, index) => {
@@ -300,6 +320,7 @@ function extraStrokes(profiles, occupiedKinds, slots, detail, available) {
     });
     return best ? [{ ...best, slot: slots[index] }] : [];
   });
+  if (count === 2) motifs.sort((a, b) => Number(a.feature.kind === 'zigzag') - Number(b.feature.kind === 'zigzag'));
   return motifs.slice(0, count).map(({ feature, source, slot }) => ({
     slot,
     points: fit(feature.points, slot.box),
@@ -328,9 +349,8 @@ export function planComposition(glyphs, detail, variant, random) {
     ));
     occupiedKinds.add(strongest.feature.kind);
     let points = fit(strongest.feature.points, slot.box);
-    if (slot.joint && slot.prefer === strongest.feature.kind) {
-      points = attachToOutline(points, slot, outline, joints);
-    }
+    const anchor = slot.prefer === strongest.feature.kind ? slot : {};
+    points = attachToOutline(points, anchor, outline, joints);
     strokes.push({
       points,
       width: axes.includes(strongest.feature.kind) ? 8.9 : 9.5,
@@ -357,12 +377,12 @@ export function planComposition(glyphs, detail, variant, random) {
     const spare = extra && slots.find(slot => !used.has(slot) && slot.prefer === extra.kind);
     if (spare) {
       occupiedKinds.add(extra.kind);
-      strokes.push({ points: fit(extra.points, spare.box), width: 6.4, sources: [donor.source] });
+      strokes.push({ points: attachToOutline(fit(extra.points, spare.box), spare, outline, joints), width: 6.4, sources: [donor.source] });
     }
   }
 
   for (const { slot, ...stroke } of extraStrokes(profiles, occupiedKinds, extraSlots, detail, 10 - strokes.length)) {
-    if (slot.joint) stroke.points = attachToOutline(stroke.points, slot, outline, joints);
+    stroke.points = attachToOutline(stroke.points, slot, outline, joints);
     strokes.push(stroke);
   }
   strokes[0].points = withJoints(outline, joints);

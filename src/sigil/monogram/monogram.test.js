@@ -203,3 +203,18 @@ test.each([true, false])('PNG uses the same paths and widths, with transparency 
     jest.restoreAllMocks();
   }
 });
+
+test('LETSIAGNRDO retains the S turn and closed O with every stroke joined', () => {
+  for (let variant = 0; variant < 4; variant++) {
+    const result = generate('LETSIAGNRDO', { form: 0, variant });
+    const vertices = path => path.d.slice(1).split('L');
+    const frame = new Set(vertices(result.paths[0]));
+    for (const path of result.paths.slice(1)) {
+      expect(vertices(path).some(point => frame.has(point))).toBe(true);
+    }
+    const from = letter => result.paths.filter(path => path.sources.includes(result.letters.indexOf(letter)));
+    expect(from('S').some(path => vertices(path).length >= 12)).toBe(true);
+    expect(from('O').some(path => vertices(path)[0] === vertices(path).at(-1))).toBe(true);
+    checkPaths(result);
+  }
+});
