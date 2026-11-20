@@ -62,8 +62,46 @@ test('the tiger intention condenses to a small mark with secondary strokes shari
 test('successive tiger variations explore a spine, curved frame, bracket and wedge', () => {
   const intention = 'This my wish to obtain the strength of a tiger';
   const shapes = [0, 1, 2, 3].map(variant => generate(intention, { form: 0, variant }));
-  expect(new Set(shapes.map(({ paths }) => paths[0].d.split('L').length)).size).toBe(shapes.length);
+  const significantTurns = ({ paths: [frame] }) => {
+    const points = frame.d.slice(1).split('L').map(pair => pair.split(' ').map(Number));
+    return points.slice(2).filter(([cx, cy], index) => {
+      const [ax, ay] = points[index];
+      const [bx, by] = points[index + 1];
+      const ab = [bx - ax, by - ay];
+      const bc = [cx - bx, cy - by];
+      const cross = Math.abs(ab[0] * bc[1] - ab[1] * bc[0]);
+      return cross > 0.08 * Math.hypot(...ab) * Math.hypot(...bc);
+    }).length;
+  };
+  const turns = shapes.map(significantTurns).sort((a, b) => a - b);
+  expect(turns.slice(0, 3)).toEqual([0, 1, 2]);
+  expect(turns[3]).toBeGreaterThan(2);
   shapes.forEach(checkPaths);
+});
+
+test('a 19-letter intention retains its wave, zigzag and closed loop across all four frames', () => {
+  const intent = 'ISTWORKNGJUCEAFYMBL';
+  const vertices = ({ d }) => d.slice(1).split('L');
+
+  for (let variant = 0; variant < 4; variant++) {
+    const result = generate(intent, { form: 0, variant });
+    const [frame] = result.paths;
+    const frameVertices = vertices(frame);
+    const attributableTo = letter => result.paths.find(({ sources }) => (
+      sources.length === 1 && result.letters[sources[0]] === letter
+    ));
+    const wave = vertices(attributableTo('S'));
+    const zigzag = vertices(attributableTo('M'));
+    const loop = vertices(attributableTo('O'));
+
+    expect(wave).toHaveLength(12);
+    expect(zigzag).toHaveLength(5);
+    expect(loop.at(-1)).toBe(loop[0]);
+    expect(wave.some(vertex => frameVertices.includes(vertex))).toBe(true);
+    expect(zigzag.some(vertex => frameVertices.includes(vertex))).toBe(true);
+    expect(result.paths.length).toBeLessThanOrEqual(10);
+    checkPaths(result);
+  }
 });
 
 test('geometric and organic forms have distinct constructions and detail keeps additional strokes', () => {

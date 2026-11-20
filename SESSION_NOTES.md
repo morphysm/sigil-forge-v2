@@ -4,7 +4,7 @@
 
 All 22 Major Arcana now have their locked straight-line faces and expanded English readings in the Monogram workflow. The green subject and egg-white supporting strokes are on pure black. The user approved supplied variants for The Fool, Strength and Justice. The Fool holds a flower at the right-hand brink. Strength shows the full figure with the lion beneath a closed infinity symbol. Justice shows a crowned figure between pillars with a green sword and scales.
 
-The latest Monogram pass uses the supplied sigil traces to guide composition. The engine starts with a dominant source shape, joins compatible fragments to it, and leaves open space for small secondary marks. The tiger intention in the Spare reference gives five paths, with all 15 distinct source letters traceable. At the user’s request, the workshop now uses the engine’s defaults for form and detail.
+The Monogram engine uses the supplied sigil traces to guide composition. It starts with a dominant source shape, joins compatible fragments to it, and leaves open space for small secondary marks. Longer inputs can retain an additional curve, zigzag, and closed loop from the source glyphs. For `ISTWORKNGJUCEAFYMBL`, the `S` curve and `M` zigzag join the main shape and the `O` survives as a closed loop. The workshop uses the engine’s defaults for form and detail.
 
 **Reveal construction** now clears the plate and reveals each path in sequence. Previously the replay finished quickly, and a browser with reduced motion enabled showed the finished sigil throughout. Replay uses static steps with reduced motion.
 
@@ -41,6 +41,7 @@ The original application is preserved at commit `7722b72`. This checkpoint saves
 
 ## Last verification
 
+- The longer-intent update passed all 158 tests, ESLint, and a portable production build. A regression test covers the retained curve, zigzag, and loop on all four silhouettes.
 - **157 automated tests** and the Tarot snapshot passed. ESLint and production builds for `/` and `/sigil-forge/` passed. Tests cover the three localized interfaces and every card in both reading editions. Production DOM checks verified switching languages on The Fool with the original reading open, including the artwork and audio paths under both base URLs. The replay test verifies stroke order, restart, and cancellation.
 - The revised SVGs were rasterized and visually checked across Latin, Icelandic, Cyrillic, Japanese and mixed-script examples. A local probe checked bounded paths and source tracing for all 6,543 bundled Japanese glyphs in mixed-script compositions.
 - Headless Chrome exited on a sandbox socket restriction. Real-browser animation, mobile layout, rendered PNG pixels and transparency, downloads, and audible playback remain unverified.

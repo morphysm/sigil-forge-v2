@@ -11,6 +11,11 @@ const frames = {
       { box: [2.25, 5.08, 1.35, 1.05], prefer: 'loop' },
     ],
     accent: [1.08, -6.75, 1.46, 0.8],
+    extraSlots: [
+      { box: [-1.43, -1.68, 2.65, 2.25], joint: [0, 0.35] },
+      { box: [1.5, 4.9, 2.66, 1.7], joint: [0, 0.92] },
+      { box: [1.6, 0.74, 1.68, 1.56] },
+    ],
   },
   arc: {
     outline: [[3, -4.7], [1.1, -5.75], [-1.35, -5.75], [-3.25, -4.55], [-4.65, -2.5],
@@ -24,6 +29,11 @@ const frames = {
       { box: [-1.92, 3.84, 1.25, 0.95], prefer: 'bracket' },
     ],
     accent: [-0.24, -6.64, 1.48, 0.8],
+    extraSlots: [
+      { box: [3.25, -3.7, 2.25, 2.05], joint: [0, 0] },
+      { box: [3.85, 3.82, 2.16, 1.74], joint: [9, 0.92] },
+      { box: [-0.5, -0.18, 1.6, 1.48] },
+    ],
   },
   wedge: {
     outline: [[-4.95, 5.72], [-0.08, -6], [4.65, 5.72]],
@@ -36,6 +46,11 @@ const frames = {
       { box: [0.78, 4.61, 1.94, 0.65], prefer: 'bracket' },
     ],
     accent: [0.22, -6.79, 1.38, 0.78],
+    extraSlots: [
+      { box: [-2.79, -2.38, 2.35, 2.35], joint: [0, 0.71] },
+      { box: [2.68, -2.65, 2.48, 1.96], joint: [1, 0.29] },
+      { box: [0.85, 0, 1.62, 1.58] },
+    ],
   },
   bracket: {
     outline: [[3.25, -5.25], [-4.05, -5.25], [-4.05, 5.15], [2.93, 5.15]],
@@ -48,6 +63,11 @@ const frames = {
       { box: [2.14, -3.5, 1.25, 0.76], prefer: 'loop' },
     ],
     accent: [-0.4, -6.17, 1.46, 0.78],
+    extraSlots: [
+      { box: [3.67, -4.06, 2.2, 2.17], joint: [0, 0] },
+      { box: [3.52, 3.96, 2.32, 1.86], joint: [2, 0.96] },
+      { box: [-0.67, -0.6, 1.64, 1.38] },
+    ],
   },
 };
 
@@ -109,6 +129,11 @@ function describe(glyph) {
       } else if (sweep > 1.45) {
         record('arc', points, totalLength(points) * 0.85);
       }
+    }
+    if (turnTotal > 2 && sweep < turnTotal * 0.63 && Math.min(w, h) >= 2
+      && length(points[0], points.at(-1)) >= Math.max(w, h) * 0.48) {
+      const kind = turn.some(value => Math.abs(value) > 1.85) ? 'zigzag' : 'wave';
+      record(kind, points);
     }
 
     // The most distant bend preserves the apex even when the stem is sampled at several points.
@@ -251,10 +276,42 @@ function withJoints(outline, joints) {
   ]);
 }
 
+function attachToOutline(points, slot, outline, joints) {
+  const [segment, fraction] = slot.joint;
+  const point = interpolate(outline[segment], outline[segment + 1], fraction);
+  if (fraction > 0 && fraction < 1) {
+    if (!joints.has(segment)) joints.set(segment, []);
+    joints.get(segment).push({ fraction, point });
+  }
+  return attach(points, point, slot.cross);
+}
+
+function extraStrokes(profiles, occupiedKinds, slots, detail, available) {
+  // More letters can share the same outline without losing their distinctive turns.
+  const count = Math.min(available, slots.length, Math.floor((profiles.length - 6) / 3), Math.ceil(detail * 6));
+  if (count <= 0) return [];
+
+  const motifs = ['wave', 'zigzag', 'loop'].flatMap((kind, index) => {
+    if (occupiedKinds.has(kind)) return [];
+    let best;
+    profiles.forEach(({ strongest }, source) => {
+      const feature = strongest.get(kind);
+      if (feature && (!best || feature.strength > best.feature.strength)) best = { feature, source };
+    });
+    return best ? [{ ...best, slot: slots[index] }] : [];
+  });
+  return motifs.slice(0, count).map(({ feature, source, slot }) => ({
+    slot,
+    points: fit(feature.points, slot.box),
+    width: 7.4,
+    sources: [source],
+  }));
+}
+
 export function planComposition(glyphs, detail, variant, random) {
   const profiles = glyphs.map(describe);
   const { family, donors } = planFrame(profiles, random, variant);
-  const { outline, slots, accent } = frames[family];
+  const { outline, slots, accent, extraSlots } = frames[family];
   const { outlineSources, groups } = selectGroups(profiles, family, donors, detail, random);
   const mirror = random() < 0.5 ? -1 : 1;
   const { w, h } = bounds(donors[0].feature.points);
@@ -263,18 +320,16 @@ export function planComposition(glyphs, detail, variant, random) {
   const strokes = [{ points: outline, width: 14.2, sources: outlineSources }];
   const placement = assignSlots(slots, groups);
   const joints = new Map();
+  const occupiedKinds = new Set();
 
   for (const { slot, contributors } of placement) {
     const strongest = contributors.reduce((best, next) => (
       next.feature.strength > best.feature.strength ? next : best
     ));
+    occupiedKinds.add(strongest.feature.kind);
     let points = fit(strongest.feature.points, slot.box);
     if (slot.joint && slot.prefer === strongest.feature.kind) {
-      const [segment, fraction] = slot.joint;
-      const point = interpolate(outline[segment], outline[segment + 1], fraction);
-      if (!joints.has(segment)) joints.set(segment, []);
-      joints.get(segment).push({ fraction, point });
-      points = attach(points, point, slot.cross);
+      points = attachToOutline(points, slot, outline, joints);
     }
     strokes.push({
       points,
@@ -282,7 +337,6 @@ export function planComposition(glyphs, detail, variant, random) {
       sources: contributors.map(({ source }) => source),
     });
   }
-  strokes[0].points = withJoints(outline, joints);
 
   const accents = profiles.flatMap(({ accents }, source) => accents.map(stroke => ({ ...stroke, source })));
   if (accents.length) {
@@ -298,13 +352,20 @@ export function planComposition(glyphs, detail, variant, random) {
     const donor = donors[0];
     const extra = [...profiles[donor.source].strongest.values()].find(feature => (
       feature.kind !== donor.feature.kind && !placement.some(({ contributors }) => contributors[0].feature.kind === feature.kind)
+      && (axes.includes(feature.kind) || gestures.includes(feature.kind))
     ));
     const spare = extra && slots.find(slot => !used.has(slot) && slot.prefer === extra.kind);
     if (spare) {
+      occupiedKinds.add(extra.kind);
       strokes.push({ points: fit(extra.points, spare.box), width: 6.4, sources: [donor.source] });
     }
   }
 
+  for (const { slot, ...stroke } of extraStrokes(profiles, occupiedKinds, extraSlots, detail, 10 - strokes.length)) {
+    if (slot.joint) stroke.points = attachToOutline(stroke.points, slot, outline, joints);
+    strokes.push(stroke);
+  }
+  strokes[0].points = withJoints(outline, joints);
   return strokes.map(stroke => ({
     ...stroke, points: stroke.points.map(([x, y]) => [x * mirror * width, y]),
   }));
