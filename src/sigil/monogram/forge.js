@@ -3,6 +3,7 @@ import { planComposition } from './composition';
 export const MONOGRAM_SIZE = 640;
 export const MAX_MONOGRAM_LETTERS = 32;
 const INSET = 73;
+const MONOGRAM_LINE_SCALE = 0.72;
 
 const distance = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
 const angle = (a, b) => Math.atan2(b[1] - a[1], b[0] - a[0]);
@@ -71,7 +72,7 @@ function composePaths(strokes, form, random) {
 
   return strokes.map(({ points, width, sources }) => ({
     d: pathData(points.map(mapPoint), form * 0.2),
-    width: Math.round(width * (1 - form * 0.08) * 100) / 100,
+    width: Math.round(width * MONOGRAM_LINE_SCALE * (1 - form * 0.08) * 100) / 100,
     sources,
   }));
 }

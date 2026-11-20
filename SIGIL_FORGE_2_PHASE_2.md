@@ -44,3 +44,5 @@ See the [session handoff](SESSION_NOTES.md#last-verification) for verification o
 ## Phase 3 handoff
 
 The Tarot phase continues to use the card ID computed during intent reduction. Form, detail, variant and interface language changes leave that ID in place. Phase 3 can add the proposed illustrated edition using the existing [Tarot redesign specification](TAROT_REDESIGN_SPEC.md) and card catalog. Before release, check the workshop on desktop and touch browsers, including reduced motion, fonts, PNG alpha and audio. The Japanese, Russian and Icelandic interface catalogs still use the English fallback.
+
+The Latin multi-letter layout now selects a shared structural feature and takes the complete pen stroke containing it from a source glyph. Branches join along the measured length of that contour. Variations can choose another donor contour. Mixed-script and non-Latin compositions retain the earlier frame layouts. This is a computational interpretation of the reference sheets.

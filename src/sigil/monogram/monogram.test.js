@@ -59,7 +59,7 @@ test('the tiger intention condenses to a small mark with secondary strokes shari
   expect(fragments.every(({ width }) => width < frame.width)).toBe(true);
 });
 
-test('successive tiger variations explore a spine, curved frame, bracket and wedge', () => {
+test('successive tiger variations use distinct source contours', () => {
   const intention = 'This my wish to obtain the strength of a tiger';
   const shapes = [0, 1, 2, 3].map(variant => generate(intention, { form: 0, variant }));
   const significantTurns = ({ paths: [frame] }) => {
@@ -74,8 +74,8 @@ test('successive tiger variations explore a spine, curved frame, bracket and wed
     }).length;
   };
   const turns = shapes.map(significantTurns).sort((a, b) => a - b);
-  expect(turns.slice(0, 3)).toEqual([0, 1, 2]);
-  expect(turns[3]).toBeGreaterThan(2);
+  expect(new Set(turns).size).toBeGreaterThan(1);
+  expect(new Set(shapes.map(shape => shape.paths[0].d)).size).toBe(4);
   shapes.forEach(checkPaths);
 });
 
@@ -217,4 +217,30 @@ test('LETSIAGNRDO retains the S turn and closed O with every stroke joined', () 
     expect(from('O').some(path => vertices(path)[0] === vertices(path).at(-1))).toBe(true);
     checkPaths(result);
   }
+});
+
+test('LETSIFWORK keeps its S curve, W bends and O loop in every frame', () => {
+  for (let variant = 0; variant < 4; variant++) {
+    const result = generate('LETSIFWORK', { form: 0, variant });
+    const vertices = path => path.d.slice(1).split('L');
+    const frame = new Set(vertices(result.paths[0]));
+    for (const [letter, count] of [['S', 12], ['W', 5], ['O', 11]]) {
+      const stroke = result.paths.find(path => path.sources.includes(result.letters.indexOf(letter))
+        && vertices(path).length === count);
+      expect(stroke).toBeDefined();
+      const points = vertices(stroke);
+      expect(points.some(point => frame.has(point))).toBe(true);
+      if (letter === 'O') expect(points[0]).toBe(points.at(-1));
+    }
+  }
+});
+
+test('the L pen stroke supplies the shared upright and foot of LETSIFWORK', () => {
+  const result = generate('LETSIFWORK', { form: 0 });
+  const outline = result.paths[0];
+  expect(outline.sources.map(i => result.letters[i])).toEqual(expect.arrayContaining(['L', 'E', 'F']));
+  const points = outline.d.slice(1).split('L').map(pair => pair.split(' ').map(Number));
+  const foot = points.filter(([, y]) => y === points.at(-1)[1]);
+  expect(foot.length).toBeGreaterThanOrEqual(2);
+  expect(Math.abs(foot[0][0] - foot.at(-1)[0])).toBeGreaterThan(100);
 });

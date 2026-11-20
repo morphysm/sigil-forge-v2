@@ -173,15 +173,29 @@ function featureForFrame(glyph, family) {
   return strongest.get(family);
 }
 
-function planFrame(profiles, random, variant) {
+function planFrame(profiles, random, variant, useLetterLayout) {
   const choices = silhouettes.map(family => {
     const donors = profiles.flatMap((profile, source) => {
       const feature = featureForFrame(profile, family);
       return feature ? [{ source, feature }] : [];
     });
-    donors.sort((a, b) => b.feature.strength - a.feature.strength);
+    // A steep diagonal may serve as a stem, but favor a true upright when
+    // several letters offer one. Otherwise W can displace the L/E/F spine.
+    const score = ({ feature }) => {
+      if (!useLetterLayout || feature.kind !== 'stem') return feature.strength;
+      const [a, b] = feature.points;
+      return feature.strength - Math.abs(b[0] - a[0]);
+    };
+    donors.sort((a, b) => score(b) - score(a));
     return { family, donors };
   }).filter(({ donors }) => donors.length);
+  if (useLetterLayout) {
+    const support = ({ donors }) => donors.filter(({ feature }) => (
+      feature.kind === donors[0].feature.kind && feature.strength >= donors[0].feature.strength * 0.6
+    )).length;
+    choices.sort((a, b) => support(b) - support(a));
+    return choices[variant % choices.length];
+  }
   const first = Math.floor(random() * choices.length);
   return choices[(first + variant) % choices.length];
 }
@@ -296,19 +310,23 @@ function nearestJoint(points, outline) {
   return best;
 }
 
-function attachToOutline(points, slot, outline, joints) {
+function attachToOutline(points, slot, outline, joints, preserveShape = false) {
   const [segment, fraction] = slot.joint ?? nearestJoint(points, outline);
   const point = interpolate(outline[segment], outline[segment + 1], fraction);
   if (fraction > 0 && fraction < 1) {
     if (!joints.has(segment)) joints.set(segment, []);
     joints.get(segment).push({ fraction, point });
   }
+  if (preserveShape) {
+    const contact = points.reduce((a, b) => length(a, point) <= length(b, point) ? a : b);
+    return points.map(([x, y]) => [point[0] + (x - contact[0]), point[1] + (y - contact[1])]);
+  }
   return attach(points, point, slot.cross);
 }
 
 function extraStrokes(profiles, occupiedKinds, slots, detail, available) {
   // More letters can share the same outline without losing their distinctive turns.
-  const count = Math.min(available, slots.length, Math.floor((profiles.length - 4) / 3), Math.ceil(detail * 6));
+  const count = Math.min(available, slots.length, Math.ceil(detail * 6));
   if (count <= 0) return [];
 
   const motifs = ['wave', 'zigzag', 'loop'].flatMap((kind, index) => {
@@ -329,10 +347,45 @@ function extraStrokes(profiles, occupiedKinds, slots, detail, available) {
   }));
 }
 
+// Use the donor's actual pen trace, including the strokes on either side of the
+// shared segment. Distribute joints by distance along that trace.
+function letterLayout(glyph, feature, variant) {
+  const trace = glyph.strokes.find(({ points }) => feature.points.every(p => points.includes(p))).points;
+  const outline = fit(trace, [0, 0, 9, 10]);
+  const spans = outline.slice(1).map((p, i) => length(outline[i], p));
+  const perimeter = totalLength(outline);
+  function slotAt(position, index, prefer) {
+    let remaining = position * perimeter;
+    let segment = 0;
+    while (segment < spans.length - 1 && remaining > spans[segment]) {
+      remaining -= spans[segment++];
+    }
+    const fraction = remaining / (spans[segment] || 1);
+    const a = outline[segment];
+    const b = outline[segment + 1];
+    const [x, y] = interpolate(a, b, fraction);
+    const side = (index + variant) % 2 ? 1 : -1;
+    const offset = side * 1.7 / (spans[segment] || 1);
+    return {
+      prefer, joint: [segment, fraction],
+      box: [x - (b[1] - a[1]) * offset, y + (b[0] - a[0]) * offset, 4.5, 4.2],
+    };
+  }
+  const kinds = [...axes, ...gestures];
+  return {
+    outline, accent: [0, bounds(outline).y - bounds(outline).h / 2 - 1, 2, 1],
+    slots: kinds.map((kind, i) => slotAt((i + 0.5) / kinds.length, i, kind)),
+    extraSlots: [0.17, 0.83, 0.49].map((fraction, i) => slotAt(fraction, i)),
+  };
+}
+
 export function planComposition(glyphs, detail, variant, random) {
   const profiles = glyphs.map(describe);
-  const { family, donors } = planFrame(profiles, random, variant);
-  const { outline, slots, accent, extraSlots } = frames[family];
+  const useLetterLayout = glyphs.every(({ letter }) => /^\p{Script=Latin}/u.test(letter));
+  const { family, donors } = planFrame(profiles, random, variant, useLetterLayout);
+  const { outline, slots, accent, extraSlots } = useLetterLayout
+    ? letterLayout(glyphs[donors[0].source], donors[0].feature, variant)
+    : frames[family];
   const { outlineSources, groups } = selectGroups(profiles, family, donors, detail, random);
   const mirror = random() < 0.5 ? -1 : 1;
   const { w, h } = bounds(donors[0].feature.points);
@@ -350,7 +403,7 @@ export function planComposition(glyphs, detail, variant, random) {
     occupiedKinds.add(strongest.feature.kind);
     let points = fit(strongest.feature.points, slot.box);
     const anchor = slot.prefer === strongest.feature.kind ? slot : {};
-    points = attachToOutline(points, anchor, outline, joints);
+    points = attachToOutline(points, anchor, outline, joints, useLetterLayout);
     strokes.push({
       points,
       width: axes.includes(strongest.feature.kind) ? 8.9 : 9.5,
@@ -382,7 +435,7 @@ export function planComposition(glyphs, detail, variant, random) {
   }
 
   for (const { slot, ...stroke } of extraStrokes(profiles, occupiedKinds, extraSlots, detail, 10 - strokes.length)) {
-    stroke.points = attachToOutline(stroke.points, slot, outline, joints);
+    stroke.points = attachToOutline(stroke.points, slot, outline, joints, true);
     strokes.push(stroke);
   }
   strokes[0].points = withJoints(outline, joints);
