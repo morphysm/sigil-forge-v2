@@ -1,0 +1,12 @@
+{
+  "files": {
+    "main.css": "/-morphysm-sigil-forge-v2/static/css/main.a1d296c7.css",
+    "main.js": "/-morphysm-sigil-forge-v2/static/js/main.960f7e41.js",
+    "static/js/74.33b55428.chunk.js": "/-morphysm-sigil-forge-v2/static/js/74.33b55428.chunk.js",
+    "index.html": "/-morphysm-sigil-forge-v2/index.html"
+  },
+  "entrypoints": [
+    "static/css/main.a1d296c7.css",
+    "static/js/main.960f7e41.js"
+  ]
+}
