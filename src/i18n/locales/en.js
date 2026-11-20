@@ -28,6 +28,7 @@ const en = {
     monogramLoadFailed: 'The Japanese stroke data could not be loaded. Try again or select the Legacy renderer with Unicode input.',
     monogramLoading: 'Loading stroke data…',
     monogramAlt: 'Generated monogram sigil',
+    spiralLayout: 'Spiral lettering',
     variation: 'Generate variation',
     revealConstruction: 'Reveal construction',
     focusView: 'Focus view',

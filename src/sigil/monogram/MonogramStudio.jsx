@@ -5,13 +5,14 @@ import './monogram.css';
 
 export default function MonogramStudio({ prepared, messages, focused, setFocused, onAnalyze, onReset }) {
   const title = useRef(null);
+  const [layout, setLayout] = useState('shared');
   const [variant, setVariant] = useState(0);
   const [construction, setConstruction] = useState({ mode: 'forge' });
   const [transparent, setTransparent] = useState(true);
   const [exportState, setExportState] = useState('idle');
   const sigil = useMemo(() => forgeMonogram(prepared.glyphs, {
-    seed: prepared.seed, variant,
-  }), [prepared, variant]);
+    seed: prepared.seed, variant, layout,
+  }), [prepared, variant, layout]);
   const { size, paths } = sigil;
   const replay = construction?.mode === 'replay' ? construction : null;
   const forgeInterval = Math.min(86, 1120 / paths.length);
@@ -105,6 +106,11 @@ export default function MonogramStudio({ prepared, messages, focused, setFocused
         {!focused && (
           <div className="monogram__controls">
             <div className="monogram__actions">
+              <button type="button" aria-pressed={layout === 'spiral'} onClick={() => {
+                setLayout(current => current === 'spiral' ? 'shared' : 'spiral');
+                setVariant(0);
+                setConstruction(null);
+              }}>{messages.spiralLayout}</button>
               <button type="button" onClick={generateVariation}>{messages.variation}</button>
               <button type="button" onClick={reveal}>{messages.revealConstruction}</button>
             </div>

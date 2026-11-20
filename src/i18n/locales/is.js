@@ -28,6 +28,7 @@ const is = {
     monogramLoadFailed: 'Ekki tókst að hlaða gögnum um strik japanskra stafa. Reyndu aftur eða veldu upprunalegu teikniaðferðina með Unicode-innslætti.',
     monogramLoading: 'Hleð inn gögnum um strik…',
     monogramAlt: 'Tákn myndað sem stafamerki',
+    spiralLayout: 'Stafir í spíral',
     variation: 'Búa til tilbrigði',
     revealConstruction: 'Sýna hvernig táknið verður til',
     focusView: 'Sýna táknið eitt og sér',

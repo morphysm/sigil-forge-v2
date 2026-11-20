@@ -28,6 +28,7 @@ const ja = {
     monogramLoadFailed: '日本語の画線データを読み込めませんでした。もう一度試すか、従来の描画方式（Unicode 入力）を選んでください。',
     monogramLoading: '画線データを読み込み中…',
     monogramAlt: '生成されたモノグラムのシジル',
+    spiralLayout: 'らせん文字',
     variation: '別の構成を生成',
     revealConstruction: '描画手順を再生',
     focusView: '集中表示',

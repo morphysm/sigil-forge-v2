@@ -278,3 +278,24 @@ test('FLOW uses three pen strokes with all four letters accounted for', () => {
   expect(drawing.paths.some(({ sources }) => sources.length >= 2)).toBe(true);
   checkPaths(drawing);
 });
+
+test('spiral lettering preserves each native pen stroke and joins neighboring glyphs in order', () => {
+  const intent = 'GÞЯ語';
+  const drawing = generate(intent, { layout: 'spiral', form: 0 });
+  const { glyphs } = resolveGlyphs(drawing.letters, japanese);
+  const vertices = path => path.d.slice(1).split('L');
+  const letters = glyphs.map((glyph, i) => {
+    const paths = drawing.paths.filter(path => path.sources.length === 1 && path.sources[0] === i);
+    expect(paths.map(path => vertices(path).length)).toEqual(glyph.strokes.map(stroke => stroke.points.length));
+    return paths.flatMap(vertices);
+  });
+  const joins = drawing.paths.filter(path => path.sources.length === 2);
+  expect(joins).toHaveLength(glyphs.length - 1);
+  joins.forEach((join, i) => {
+    const [start, end] = vertices(join);
+    expect(letters[i]).toContain(start);
+    expect(letters[i + 1]).toContain(end);
+  });
+  checkPaths(drawing);
+  expect(generate(intent, { layout: 'spiral', form: 0 })).toEqual(drawing);
+});
