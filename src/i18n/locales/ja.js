@@ -44,7 +44,6 @@ const ja = {
     resonance: '// 共鳴を確認',
     tarotArchetype: '元型',
     tarotMorphystic: 'Morphystic の解釈',
-    tarotIntent: 'あなたの意図',
     tarotTension: '対立する力',
     tarotOriginal: 'オリジナルのリーディング',
     tarotFallback: '翻訳の準備ができるまで、このリーディングは英語で表示されます。',

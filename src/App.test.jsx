@@ -314,7 +314,7 @@ test.each(['ja', 'ru', 'is'].flatMap(locale => (
     expect(art.getAttribute('src')).toBe(`/sigil-forge/${card.illustration.src}`);
     expect(art.getAttribute('srcset')).toContain(`/sigil-forge/${card.illustration.small} 420w`);
     expect(art.alt).toBe(expanded.artAlt);
-    expect(reading.querySelectorAll('dd')).toHaveLength(4);
+    expect(reading.querySelectorAll('dd')).toHaveLength(3);
     expect(reading.querySelector('.illustrated-reading__language-note')).toBeNull();
     expect(reading.querySelector('details summary').textContent).toBe(messages.tarotOriginal);
     expect(reading.querySelector('details p').lang).toBe(locale);
@@ -342,5 +342,6 @@ test('the illustrated reading stays readable if the card illustration fails', as
   expect(container.querySelector('.illustrated-reading img')).toBeNull();
   expect(container.querySelector('.illustrated-reading [role="status"]').textContent)
     .toBe('The card illustration could not be loaded.');
-  expect(container.querySelector('.illustrated-reading__question').textContent).toMatch(/tower/);
+  expect(container.querySelector('.illustrated-reading__question').textContent)
+    .toBe(getReading('en', 16, 'expanded').question);
 });

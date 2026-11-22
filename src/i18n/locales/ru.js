@@ -44,7 +44,6 @@ const ru = {
     resonance: '// РЕЗОНАНС УСТАНОВЛЕН',
     tarotArchetype: 'Архетип',
     tarotMorphystic: 'Трактовка Morphystic',
-    tarotIntent: 'Ваше намерение',
     tarotTension: 'Противоречие',
     tarotOriginal: 'Исходная трактовка',
     tarotFallback: 'Эта трактовка отображается на английском, пока готовится перевод.',

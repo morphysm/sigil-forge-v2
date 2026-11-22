@@ -44,7 +44,6 @@ const is = {
     resonance: '// ÓMUN NÁÐ',
     tarotArchetype: 'Frummynd',
     tarotMorphystic: 'Túlkun Morphystic',
-    tarotIntent: 'Ætlun þín',
     tarotTension: 'Togstreita',
     tarotOriginal: 'Upprunaleg túlkun',
     tarotFallback: 'Þessi túlkun birtist á ensku á meðan þýðingin er í vinnslu.',

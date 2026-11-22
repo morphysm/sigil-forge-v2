@@ -15,7 +15,6 @@ export default function IllustratedReading({
   const facets = [
     [messages.tarotArchetype, reading.archetype],
     [messages.tarotMorphystic, reading.morphystic],
-    [messages.tarotIntent, reading.intentReflection],
     [messages.tarotTension, reading.tension],
   ];
 

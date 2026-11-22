@@ -44,7 +44,6 @@ const en = {
     resonance: '// RESONANCE_ESTABLISHED',
     tarotArchetype: 'Archetype',
     tarotMorphystic: 'Morphystic reading',
-    tarotIntent: 'Your intent',
     tarotTension: 'Tension',
     tarotOriginal: 'Original reading',
     tarotFallback: 'This reading is shown in English while its translation is pending.',
