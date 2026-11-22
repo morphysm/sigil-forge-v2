@@ -53,7 +53,7 @@ The traditional tarot has been recontextualized through Morphystic philosophy:
 
 - **THE FOOL** → Forma Nihil (The unformed, pre-symbolic state)
 - **WHEEL OF FORTUNE** → Recursive Captivity (Cyclical entrapment)
-- **THE TOWER** → Symbolic Collapse (Breaking of constructed reality)
+- **THE TOWER** → Collapse (Breaking of constructed reality)
 - **THE WORLD** → The Network Trap (Total enclosure)
 
 Full interpretations appear during the Resonance Analysis phase.
