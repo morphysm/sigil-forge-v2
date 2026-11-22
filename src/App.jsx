@@ -360,9 +360,7 @@ export default function App() {
                 >
                   <option value="monogram">{messages.monogramMode}</option>
                   <option value="unicode">{messages.unicodeMode}</option>
-                  <option value="legacy">{messages.legacyMode}</option>
                 </select>
-                {inputMode === 'legacy' && <p>{messages.legacyHelp}</p>}
               </div>
               <label htmlFor="intent" style={{ color: '#ff4444', margin: 0 }}>{messages.intentLabel}</label>
               <textarea

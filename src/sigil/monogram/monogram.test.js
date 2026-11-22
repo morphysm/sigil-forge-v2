@@ -33,90 +33,72 @@ test('normalization and a stable seed reproduce every path and source', () => {
   checkPaths(first);
 });
 
-test('letter identity and order change construction, with traceable exact shared spans', () => {
+test('letter identity and order change construction', () => {
   const art = generate('ART');
-  expect(generate('ART', { form: NaN, intricacy: Infinity })).toEqual(art);
+  expect(generate('ART')).toEqual(art);
   expect(generate('ARK').paths).not.toEqual(art.paths);
   expect(generate('TAR').paths).not.toEqual(art.paths);
-  expect(generate('AART').paths).not.toEqual(art.paths);
-  expect(art.paths.some(({ sources }) => sources.includes(0) && sources.includes(2))).toBe(true);
   checkPaths(art);
 });
 
-test('the tiger intention condenses to a small mark with secondary strokes sharing frame joints', () => {
-  const intention = 'This my wish to obtain the strength of a tiger';
-  const simple = generate(intention, { form: 0, intricacy: 0 });
-  const intricate = generate(intention, { form: 0, intricacy: 1 });
-  expect(simple.letters).toHaveLength(15);
-  expect(simple.paths.length).toBeLessThanOrEqual(6);
-  expect(intricate.paths.length).toBeGreaterThan(simple.paths.length);
-  checkPaths(simple);
-  checkPaths(intricate);
+const vertices = path => path.d.slice(1).split('L');
+const coordinates = path => vertices(path).map(pair => pair.split(' ').map(Number));
 
-  const [frame, ...fragments] = simple.paths;
-  const vertices = ({ d }) => d.slice(1).split('L');
-  expect(fragments.some(path => vertices(path).some(point => vertices(frame).includes(point)))).toBe(true);
-  expect(fragments.every(({ width }) => width < frame.width)).toBe(true);
+test('the frame letter is the widest stroke, upright and centred, with smaller letters inside and on the axis', () => {
+  const result = generate('TEMPLAR');
+  const [frame] = result.paths;
+  const frameLetters = frame.sources.map(index => result.letters[index]);
+  expect(frameLetters).toContain('A');
+  expect(result.paths.every(path => path.width <= frame.width)).toBe(true);
+  expect(result.paths.some(path => path.width < frame.width * 0.75)).toBe(true);
+  const xs = result.paths.flatMap(path => coordinates(path).map(([x]) => x));
+  expect(Math.abs((Math.min(...xs) + Math.max(...xs)) / 2 - MONOGRAM_SIZE / 2)).toBeLessThan(MONOGRAM_SIZE * 0.02);
+  checkPaths(result);
 });
 
-test('successive tiger variations use distinct source contours', () => {
-  const intention = 'This my wish to obtain the strength of a tiger';
-  const shapes = [0, 1, 2, 3].map(variant => generate(intention, { form: 0, variant }));
-  const significantTurns = ({ paths: [frame] }) => {
-    const points = frame.d.slice(1).split('L').map(pair => pair.split(' ').map(Number));
-    return points.slice(2).filter(([cx, cy], index) => {
-      const [ax, ay] = points[index];
-      const [bx, by] = points[index + 1];
-      const ab = [bx - ax, by - ay];
-      const bc = [cx - bx, cy - by];
-      const cross = Math.abs(ab[0] * bc[1] - ab[1] * bc[0]);
-      return cross > 0.08 * Math.hypot(...ab) * Math.hypot(...bc);
-    }).length;
-  };
-  const turns = shapes.map(significantTurns).sort((a, b) => a - b);
-  expect(new Set(turns).size).toBeGreaterThan(1);
-  expect(new Set(shapes.map(shape => shape.paths[0].d)).size).toBe(4);
-  shapes.forEach(checkPaths);
+test('serifs close the free ends of straight strokes', () => {
+  const result = generate('TEMPLAR');
+  const [frame] = result.paths;
+  const serifs = result.paths.filter(path => {
+    const points = coordinates(path);
+    return points.length === 2 && points[0][1] === points[1][1]
+      && path.width < frame.width && path.sources.join() === frame.sources.join();
+  });
+  // Both feet of the A frame.
+  expect(serifs.length).toBeGreaterThanOrEqual(2);
 });
 
-test('a 19-letter intention retains its wave, zigzag and closed loop across all four frames', () => {
-  const intent = 'ISTWORKNGJUCEAFYMBL';
-  const vertices = ({ d }) => d.slice(1).split('L');
+test('closed bowls are drawn as true round curves', () => {
+  const result = generate('VOX');
+  const ring = result.paths.find(path => path.sources.includes(result.letters.indexOf('O')) && vertices(path).length >= 16);
+  expect(ring).toBeDefined();
+  expect(vertices(ring)[0]).toBe(vertices(ring).at(-1));
+  expect(result.paths.every(path => !path.d.includes('C'))).toBe(true);
+});
 
-  for (let variant = 0; variant < 4; variant++) {
-    const result = generate(intent, { form: 0, variant });
-    const [frame] = result.paths;
-    const frameVertices = vertices(frame);
-    const attributableTo = (letter, count) => result.paths.find(path => (
-      path.sources.includes(result.letters.indexOf(letter)) && vertices(path).length === count
-    ));
-    const wave = vertices(attributableTo('S', 12));
-    const zigzag = vertices(attributableTo('M', 5));
-    const loop = vertices(attributableTo('O', 11));
+test('a letter contained in a larger one is carried by its strokes instead of being redrawn', () => {
+  const result = generate('FLEX');
+  const index = letter => result.letters.indexOf(letter);
+  for (const letter of ['F', 'L']) {
+    expect(result.paths.some(path => path.sources.includes(index(letter)) && path.sources.includes(index('E')))).toBe(true);
+    expect(result.paths.some(path => path.sources.length === 1 && path.sources[0] === index(letter))).toBe(false);
+  }
+  checkPaths(result);
+});
 
-    expect(wave).toHaveLength(12);
-    expect(zigzag).toHaveLength(5);
-    expect(loop.at(-1)).toBe(loop[0]);
-    expect(wave.some(vertex => frameVertices.includes(vertex))).toBe(true);
-    expect(zigzag.some(vertex => frameVertices.includes(vertex))).toBe(true);
-    expect(result.paths.length).toBeLessThanOrEqual(10);
-    checkPaths(result);
+test('every letter stays traceable in long, Cyrillic and Japanese intentions', () => {
+  for (const intent of ['This my wish to obtain the strength of a tiger', 'LETSIAGNRDO', 'МОСКВА', '日本語', 'AЖÞ日']) {
+    for (let variant = 0; variant < 3; variant++) checkPaths(generate(intent, { variant }));
   }
 });
 
-test('geometric and organic forms have distinct constructions and detail keeps additional strokes', () => {
-  const geometric = generate('ÞÐЉ語', { form: 0, intricacy: 1 });
-  const organic = generate('ÞÐЉ語', { form: 1, intricacy: 1 });
-  expect(geometric.paths.every(path => !path.d.includes('C'))).toBe(true);
-  expect(organic.paths.some(path => path.d.includes('C'))).toBe(true);
-  expect(organic.paths).not.toEqual(geometric.paths);
-  const simple = generate('語', { intricacy: 0 });
-  const intricate = generate('語', { intricacy: 1 });
-  expect(intricate.paths.length).toBeGreaterThan(simple.paths.length);
-  checkPaths(geometric);
-  checkPaths(organic);
-  checkPaths(simple);
-  checkPaths(intricate);
+test('each variation changes the drawing and repeats exactly', () => {
+  for (const intent of ['ART', 'VOX', 'LETSIAGNRDO', 'МОСКВА']) {
+    const drawings = [0, 1, 2].map(variant => generate(intent, { variant }).paths);
+    expect(drawings[1]).not.toEqual(drawings[0]);
+    expect(drawings[2]).not.toEqual(drawings[1]);
+    expect(generate(intent, { variant: 2 }).paths).toEqual(drawings[2]);
+  }
 });
 
 test('native glyph processing covers the advertised alphabets, halfwidth kana and Japanese voicing', () => {
@@ -149,8 +131,9 @@ test('dense mixed-script compositions keep geometry bounded across repeated vari
   expect(forgeMonogram([])).toBeNull();
   const start = performance.now();
   for (let variant = 0; variant < 8; variant++) {
-    const result = forgeMonogram(glyphs, { variant, form: (variant % 2), intricacy: 1 });
-    expect(result.paths.length).toBeLessThanOrEqual(10);
+    const result = forgeMonogram(glyphs, { variant });
+    const strokes = glyphs.reduce((sum, glyph) => sum + glyph.strokes.length, 0);
+    expect(result.paths.length).toBeLessThanOrEqual(strokes * 2 + 4);
     checkPaths(result);
   }
   // A large regression allowance keeps this useful on slower CI machines.
@@ -202,81 +185,6 @@ test.each([true, false])('PNG uses the same paths and widths, with transparency 
     global.Path2D = path2d;
     jest.restoreAllMocks();
   }
-});
-
-test('LETSIAGNRDO retains the S turn and closed O with every stroke joined', () => {
-  for (let variant = 0; variant < 4; variant++) {
-    const result = generate('LETSIAGNRDO', { form: 0, variant });
-    const vertices = path => path.d.slice(1).split('L');
-    const frame = new Set(vertices(result.paths[0]));
-    for (const path of result.paths.slice(1)) {
-      expect(vertices(path).some(point => frame.has(point))).toBe(true);
-    }
-    const from = letter => result.paths.filter(path => path.sources.includes(result.letters.indexOf(letter)));
-    expect(from('S').some(path => vertices(path).length >= 12)).toBe(true);
-    expect(from('O').some(path => vertices(path)[0] === vertices(path).at(-1))).toBe(true);
-    checkPaths(result);
-  }
-});
-
-test('LETSIFWORK keeps its S curve, W bends and O loop in the alternate frames', () => {
-  for (let variant = 1; variant < 4; variant++) {
-    const result = generate('LETSIFWORK', { form: 0, variant });
-    const vertices = path => path.d.slice(1).split('L');
-    const frame = new Set(vertices(result.paths[0]));
-    for (const [letter, count] of [['S', 12], ['W', 5], ['O', 11]]) {
-      const stroke = result.paths.find(path => path.sources.includes(result.letters.indexOf(letter))
-        && vertices(path).length === count);
-      expect(stroke).toBeDefined();
-      const points = vertices(stroke);
-      expect(points.some(point => frame.has(point))).toBe(true);
-      if (letter === 'O') expect(points[0]).toBe(points.at(-1));
-    }
-  }
-});
-
-test('the L pen stroke supplies the shared upright and foot of LETSIFWORK', () => {
-  const result = generate('LETSIFWORK', { form: 0 });
-  const outline = result.paths[0];
-  expect(outline.sources.map(i => result.letters[i])).toEqual(expect.arrayContaining(['L', 'E', 'F']));
-  const points = outline.d.slice(1).split('L').map(pair => pair.split(' ').map(Number));
-  const foot = points.filter(([, y]) => y === points.at(-1)[1]);
-  expect(foot.length).toBeGreaterThanOrEqual(2);
-  expect(Math.abs(foot[0][0] - foot.at(-1)[0])).toBeGreaterThan(100);
-});
-
-test.each(['LETSIFWORK'])('the interlocked %s shares the bowl closure and both W feet', intent => {
-  const result = generate(intent, { form: 0 });
-  const [spine, bowl, zigzag] = result.paths.map(path => path.d.slice(1).split('L'));
-  expect([bowl[0], bowl.at(-1)]).toEqual(spine.slice(1, 3));
-  expect([zigzag[1], zigzag[3]]).toEqual(spine.slice(3, 5));
-  checkPaths(result);
-});
-
-test('related intentions and later variations change the actual pen construction', () => {
-  // Ignore coordinates while retaining the order of pen joints on the lead stroke.
-  const structure = result => {
-    const vertices = d => d.slice(1).split('L');
-    const outline = vertices(result.paths[0].d);
-    return JSON.stringify(result.paths.map(({ d, sources }) => [
-      vertices(d).length, sources.map(index => result.letters[index]).sort().join(''),
-      vertices(d).map(point => outline.indexOf(point)),
-    ]));
-  };
-  const sketch = (intent, variant = 0) => generate(intent, { form: 0, variant });
-  const words = ['FLOW', 'WOLF', 'FLOWER'];
-  expect(new Set(words.map(word => structure(sketch(word)))).size).toBe(3);
-  expect(structure(sketch('LETSIFWORK', 4))).not.toEqual(structure(sketch('LETSIFWORK')));
-  const sequence = Array.from({ length: 8 }, (_, i) => structure(sketch('FLOWER', i)));
-  expect(new Set(sequence).size).toBeGreaterThan(4);
-  expect(sketch('FLOWER', 6)).toEqual(sketch('FLOWER', 6));
-});
-
-test('FLOW uses three pen strokes with all four letters accounted for', () => {
-  const drawing = generate('FLOW');
-  expect(drawing.paths).toHaveLength(3);
-  expect(drawing.paths.some(({ sources }) => sources.length >= 2)).toBe(true);
-  checkPaths(drawing);
 });
 
 test('spiral lettering preserves each native pen stroke and joins neighboring glyphs in order', () => {

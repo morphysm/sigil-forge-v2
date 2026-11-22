@@ -1,5 +1,5 @@
 import { spiralStrokes } from './spiral';
-import { planComposition } from './composition';
+import { inscribeStrokes } from './inscribed';
 
 export const MONOGRAM_SIZE = 640;
 export const MAX_MONOGRAM_LETTERS = 32;
@@ -9,7 +9,6 @@ const MONOGRAM_LINE_SCALE = 0.72;
 const distance = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
 const angle = (a, b) => Math.atan2(b[1] - a[1], b[0] - a[0]);
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-const pathLength = points => points.slice(1).reduce((sum, point, index) => sum + distance(points[index], point), 0);
 
 function seededRandom(seed) {
   let value = 2166136261;
@@ -18,19 +17,6 @@ function seededRandom(seed) {
     value = (Math.imul(value, 1664525) + 1013904223) >>> 0;
     return value / 4294967296;
   };
-}
-
-function singleGlyph(strokes, detail) {
-  const structural = strokes.filter(stroke => !stroke.accent)
-    .sort((a, b) => pathLength(b.points) - pathLength(a.points));
-  return [
-    ...structural.slice(0, 2 + Math.round(detail * 4)),
-    ...strokes.filter(stroke => stroke.accent).slice(0, 6),
-  ].map(({ points, accent }, index) => ({
-    points,
-    width: accent ? 6.5 : index === 0 ? 14.2 : 9.5,
-    sources: [0],
-  }));
 }
 
 function pathData(points, rounding) {
@@ -56,7 +42,8 @@ function pathData(points, rounding) {
 }
 
 function composePaths(strokes, form, random) {
-  const lean = (random() - 0.5) * (0.09 + form * 0.28);
+  // An inscribed sigil stands upright: no lean unless the line is organic.
+  const lean = form ? (random() - 0.5) * (0.09 + form * 0.28) : 0;
   const phase = random() * Math.PI * 2;
   const bend = ([x, y]) => [x + lean * y + Math.sin(y * 0.25 + phase) * form * 0.32, y];
   const points = strokes.flatMap(stroke => stroke.points.map(bend));
@@ -78,18 +65,15 @@ function composePaths(strokes, form, random) {
   }));
 }
 
-export function forgeMonogram(glyphs, { seed = '', variant = 0, form = 0.44, intricacy = 0.5, layout = 'shared' } = {}) {
+export function forgeMonogram(glyphs, { seed = '', variant = 0, form = 0.44, layout = 'inscribed' } = {}) {
   if (!glyphs.length || glyphs.length > MAX_MONOGRAM_LETTERS) return null;
   const letters = glyphs.map(({ letter }) => letter);
   const revision = Number.isSafeInteger(variant) && variant >= 0 ? variant : 0;
   const random = seededRandom(JSON.stringify(['monogram-drawing', letters, seed, revision]));
-  const organic = Number.isFinite(form) ? clamp(form, 0, 1) : 0.44;
-  const detail = Number.isFinite(intricacy) ? clamp(intricacy, 0, 1) : 0.5;
-  const strokes = layout === 'spiral'
-    ? spiralStrokes(glyphs, random)
-    : glyphs.length === 1
-    ? singleGlyph(glyphs[0].strokes, detail)
-    : planComposition(glyphs, detail, revision, random);
+  const spiral = layout === 'spiral';
+  // Inscribed sigils use a clean engraved line; the spiral keeps its pen curve.
+  const organic = spiral && Number.isFinite(form) ? clamp(form, 0, 1) : spiral ? 0.44 : 0;
+  const strokes = spiral ? spiralStrokes(glyphs, random) : inscribeStrokes(glyphs, revision);
   const style = seededRandom(JSON.stringify([letters, seed, revision]));
   return { size: MONOGRAM_SIZE, paths: composePaths(strokes, organic, style), letters };
 }

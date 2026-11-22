@@ -80,8 +80,8 @@ afterEach(() => {
   delete global.IS_REACT_ACT_ENVIRONMENT;
 });
 
-test('Legacy Mode preserves reduction, PNG download, reading, card art, audio and purge', () => {
-  choose('#input-mode', 'legacy');
+test('Legacy preserves reduction, PNG download, reading, card art, audio and purge', () => {
+  choose('#input-mode', 'unicode');
   typeIntent('ab c a b c');
   click('[ EXECUTE.REDUCTION ]');
   expect(container.querySelector('.sf-letters-display').textContent).toBe('ABC');
@@ -109,7 +109,7 @@ test('Legacy Mode preserves reduction, PNG download, reading, card art, audio an
   expect(audio.pause).toHaveBeenCalledTimes(1);
   expect(audio.currentTime).toBe(0);
   expect(container.querySelector('#intent').value).toBe('');
-  expect(container.querySelector('#input-mode').value).toBe('legacy');
+  expect(container.querySelector('#input-mode').value).toBe('unicode');
 });
 
 test.each([
@@ -146,16 +146,6 @@ test.each([
   expect(container.querySelector('h2').textContent).toBe(japaneseTitle);
   expect(container.querySelector('.sf-resonance-card').lang).toBe('ja');
   expect(audio.play).toHaveBeenCalledTimes(1);
-});
-
-test('Legacy Mode retains the original non-ASCII fallback when explicitly selected', () => {
-  choose('#input-mode', 'legacy');
-  typeIntent('日本語');
-  click('[ EXECUTE.REDUCTION ]');
-  expect(container.querySelector('.sf-letters-display').textContent).toBe('X');
-  click('[ FORGE SIGIL ]');
-  click('[ ANALYZE.RESONANCE ]');
-  expect(container.querySelector('h2').textContent).toBe('2. THE HIGH PRIESTESS');
 });
 
 test('blank and letterless input show validation, and cancel and forge new clear intent', () => {
@@ -209,7 +199,7 @@ test('Spiral lettering switches the visible drawing and restores the original', 
   const paths = () => [...container.querySelectorAll('.monogram__plate path')].map(path => path.getAttribute('d'));
   const original = paths();
   click('Spiral lettering');
-  expect(paths().length).toBeGreaterThan(original.length);
+  expect(paths()).not.toEqual(original);
   click('Spiral lettering');
   expect(paths()).toEqual(original);
 });

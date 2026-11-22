@@ -15,12 +15,12 @@ SIGIL.FORGE is a web-based implementation of Austin Osman Spare's sigilization t
 ## II. THE PROCESS
 
 ### 1. Intent Reduction (`[ EXECUTE.REDUCTION ]`)
-Enter a statement of intent. **Spare / Monogram** is the default. It retains the first occurrence of each normalized letter for construction. It uses native shapes for Latin, Icelandic, Cyrillic, kana and supported kanji. If the workshop cannot construct a character, it lists it and lets you edit the intent or choose **Legacy renderer (Unicode input)**. **Legacy Mode (original ASCII rules)** preserves the v1.0 reduction, including the `X` fallback.
+Enter a statement of intent. **Spare / Monogram** is the default. It retains the first occurrence of each normalized letter for construction. It uses native shapes for Latin, Icelandic, Cyrillic, kana and supported kanji. If the workshop cannot construct a character, it lists it and lets you edit the intent or choose **Legacy (original renderer)**, which accepts any letter.
 
 ### 2. Sigil Generation (`[ FORGE SIGIL ]`)
-In **Spare / Monogram**, the engine takes a spine, open arc, wedge, or bracket from the source letters and fits compatible strokes around it. Shared strokes are drawn once. **Generate variation** explores other silhouettes supported by the same letters. **Reveal construction** replays the stroke sequence. **Focus view** shows the settled mark. Export an SVG or a 2400 × 2400 PNG, with transparency or a dark background.
+In **Spare / Monogram**, one enclosing letter (such as A, V, M, O or E) becomes the frame. Smaller letters are nested inside it, and the rest stand as small marks on a vertical axis above and below. A letter already contained in a larger one (such as F inside E) is not drawn twice. Straight ends carry serifs and bowls are true curves. **Generate variation** tries other frame letters and rearranges the nested letters. **Reveal construction** replays the stroke sequence. **Focus view** shows the settled mark. Export an SVG or a 2400 × 2400 PNG, with transparency or a dark background.
 
-The Legacy renderer draws the original random red polyline with the number of segments determined by the reduced letter count. Use **Download** to save the original 600 × 600 PNG.
+Legacy draws the original random red polyline with the number of segments determined by the reduced letter count. Use **Download** to save the original 600 × 600 PNG.
 
 **Traditional charging methods apply:**
 - Download and print the sigil, then burn it to release the intent
@@ -28,7 +28,7 @@ The Legacy renderer draws the original random red polyline with the number of se
 - Following Spare's doctrine, the sigil must be charged through focused attention and then banished from conscious memory to work at the subconscious level
 
 ### 3. Resonance Analysis (`[ ANALYZE.RESONANCE ]`)
-Intent reduced to A–Z uses the original sum of distinct letter values (A=1 through Z=26), modulo 22. With Unicode input, non-ASCII letters use 32-bit FNV-1a over the ordered normalized letters encoded as UTF-8, also modulo 22. Each sigil variant uses the same selected reading and cue. The interface language is independent of input.
+An intent made only of A–Z letters uses the original sum of distinct letter values (A=1 through Z=26), modulo 22. Any other letters use 32-bit FNV-1a over the ordered normalized letters encoded as UTF-8, also modulo 22. Each sigil variant uses the same selected reading and cue. The interface language is independent of input.
 
 **Interface language** switches the controls and both Tarot reading editions between English, Japanese, Russian, and Icelandic. Each language includes all 22 cards.
 

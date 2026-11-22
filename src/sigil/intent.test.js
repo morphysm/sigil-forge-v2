@@ -1,30 +1,5 @@
 import { prepareIntent } from './intent';
-import { forgeLegacySigil, reduceLegacyIntent } from './legacy';
-
-describe('Legacy Mode compatibility', () => {
-  test.each([
-    [' ab c a b c ', 'ABC', 6],
-    [' V!\t', 'V', 0],
-    ['I WILL BE CALM', 'IWLBECAM', 2],
-    ['日本語', 'X', 2],
-    ['Привет', 'X', 2],
-    ['ÞÓR', 'R', 18],
-    ['AЖB', 'AB', 3],
-    ['ＡＢＣ', 'X', 2],
-    ['123!?', 'X', 2],
-    ['Á', 'X', 2],
-    ['A\u0301', 'A', 1],
-    ['ß', 'S', 19],
-    ['ﬃ', 'FI', 15],
-  ])('reduces %j to %s and preserves its card ID', (intent, core, cardId) => {
-    expect(reduceLegacyIntent(intent)).toEqual([...core]);
-    expect(prepareIntent(intent, 'legacy')).toEqual({ letters: [...core], cardId });
-  });
-
-  test('does not advance on blank input', () => {
-    expect(prepareIntent(' \t\u3000', 'legacy')).toBeNull();
-  });
-});
+import { forgeLegacySigil } from './legacy';
 
 describe('Unicode intent', () => {
   test.each([

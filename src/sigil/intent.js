@@ -1,12 +1,6 @@
 import { selectCardId } from '../tarot/resonance';
-import { reduceLegacyIntent } from './legacy';
 
 export function prepareIntent(intent, inputMode = 'unicode') {
-  if (inputMode === 'legacy') {
-    const letters = reduceLegacyIntent(intent);
-    return letters.length ? { letters, cardId: selectCardId(letters) } : null;
-  }
-
   // Fold full-width ASCII and half-width kana without folding other compatibility forms.
   const normalized = intent
     .replace(/[\uFF01-\uFF5E\uFF66-\uFF9F]+/gu, widthForms => widthForms.normalize('NFKC'))

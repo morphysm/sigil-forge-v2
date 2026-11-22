@@ -5,7 +5,7 @@ import './monogram.css';
 
 export default function MonogramStudio({ prepared, messages, focused, setFocused, onAnalyze, onReset }) {
   const title = useRef(null);
-  const [layout, setLayout] = useState('shared');
+  const [layout, setLayout] = useState('inscribed');
   const [variant, setVariant] = useState(0);
   const [construction, setConstruction] = useState({ mode: 'forge' });
   const [transparent, setTransparent] = useState(true);
@@ -107,7 +107,7 @@ export default function MonogramStudio({ prepared, messages, focused, setFocused
           <div className="monogram__controls">
             <div className="monogram__actions">
               <button type="button" aria-pressed={layout === 'spiral'} onClick={() => {
-                setLayout(current => current === 'spiral' ? 'shared' : 'spiral');
+                setLayout(current => current === 'spiral' ? 'inscribed' : 'spiral');
                 setVariant(0);
                 setConstruction(null);
               }}>{messages.spiralLayout}</button>

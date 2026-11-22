@@ -15,7 +15,6 @@ test('the 22 original Tarot outcomes and assets remain in the documented order',
 test.each(Array.from('VABCDEFGHIJKLMNOPQRSTU', (letter, id) => [letter, id]))(
   'the original A1Z26 selector maps %s to card %i',
   (letter, id) => {
-    expect(prepareIntent(letter, 'legacy').cardId).toBe(id);
     expect(prepareIntent(letter).cardId).toBe(id);
     expect(getCard(id).id).toBe(id);
     expect(getReading('en', id).name).toMatch(new RegExp(`^${id}\\. `));

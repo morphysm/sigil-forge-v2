@@ -4,7 +4,16 @@
 
 All 22 Major Arcana now have their locked straight-line faces and expanded English readings in the Monogram workflow. The green subject and egg-white supporting strokes are on pure black. The user approved supplied variants for The Fool, Strength and Justice. The Fool holds a flower at the right-hand brink. Strength shows the full figure with the lion beneath a closed infinity symbol. Justice shows a crowned figure between pillars with a green sword and scales.
 
-The Monogram engine uses the supplied sigil traces to guide composition. It starts with a dominant source shape, joins compatible fragments to it, and leaves open space for small secondary marks. Longer inputs can retain an additional curve, zigzag, and closed loop from the source glyphs. For `ISTWORKNGJUCEAFYMBL`, the `S` curve and `M` zigzag join the main shape and the `O` survives as a closed loop. The workshop uses the engine’s defaults for form and detail.
+**Monogram engine replaced (2026-11-22, approved by the user in a browser, committed and deployed).** The old joined-fragment engine (`composition.js`) looked like a tag, not like the Spare references, so the user approved deleting it. The new `src/sigil/monogram/inscribed.js` follows the reference rules:
+- **Frame:** one enclosing letter, chosen from the table A V M W O U C E H D П Л Ц Ш Q G (Cyrillic look-alikes are mapped). Without one, the largest glyph is the frame with no interior.
+- **Absorption:** a letter whose segments already lie on a larger letter is not redrawn, only credited in `sources` (F and L inside E).
+- **Nesting:** each interior box (hand-tuned per frame letter) holds one smaller letter, or a pair when the intention is long.
+- **Axis marks:** the remaining letters become small marks stacked above and below on the centre line, joined by a spine.
+- **Line:** serifs on free straight ends, true ellipses for closed bowls, Chaikin rounding for other curves, and sharp corners kept crisp. The line is clean and engraved, with no lean or Bézier curves (`L` commands only).
+- **Weights:** frame 12, nested 8, marks 5.5, spine 6.5.
+- **Variation:** cycles the frame among candidates, then rotates which letters nest.
+
+Spiral lettering is unchanged. The contact sheet is `art/monogram-studies/inscribed.png`. Weak spots: Japanese-only input (no frame table), and 15+ letter intentions are dense.
 
 **Reveal construction** now clears the plate and reveals each path in sequence. Previously the replay finished quickly, and a browser with reduced motion enabled showed the finished sigil throughout. Replay uses static steps with reduced motion.
 
@@ -22,7 +31,7 @@ The original application is preserved at commit `7722b72`. This checkpoint saves
 
 - **Phase 1** separated intent normalization, Tarot selection, card metadata, and locale catalogs. It fixed logo and audio paths at subpath deployments. Intent script and interface language are independent.
 - **Phase 2** made Spare / Monogram the default. It combines normalized character strokes into deterministic, traceable sigils. It supports Latin, Icelandic, Cyrillic, and mixed-script input, with 6,543 lazily loaded Japanese glyph shapes. The workshop offers seeded variations, construction replay, and Focus view. Export is SVG or 2400 × 2400 PNG with optional transparency.
-- **Legacy** remains available through the original ASCII mode and the Phase 1 Unicode option, both using the original renderer. The 22 Tarot IDs, original English readings, procedural card visuals and audio references are preserved.
+- **Legacy** is one option, **Legacy (original renderer)** (internal mode value `unicode`). It accepts any letter and draws with the original renderer. On 2026-11-22 the separate ASCII-only Legacy Mode (A–Z only, `X` fallback, `reduceLegacyIntent`) was merged into it at the user's request. Plain A–Z intents still get the original A1Z26 card. The 22 Tarot IDs, original English readings, procedural card visuals and audio references are preserved.
 - **Phase 3 deck** ships 19 vector masters, three approved PNG variants, responsive 420 × 630 and 600 × 900 exports, alt text, and six expanded English reading fields per card. Earlier pilots remain in the [art archive](art/tarot/pilot/README.md).
 
 ## Files to read when resuming
@@ -62,4 +71,7 @@ The original application is preserved at commit `7722b72`. This checkpoint saves
 
 ## Exact next step
 
-Test language switching on the forge and Tarot screens. Try `V` for The Fool, switch between 日本語, Русский, and Íslenska, and open the original reading. Remaining Tarot work includes translation review, browser checks, and audio rights and design.
+1. **Tarot reading rewrite (analysed, not started).** `src/i18n/locales/expanded.en.js` (the Spare/Monogram readings) is sugar-coated: every `tension` uses the same "X can help… It can also…" formula, Morphystic terms (Demiurge, Prison Loop, Wyrmos, Cainite) are drained, and closings are gentle advice. Several cards flip the March doctrine in `legacy.en.js`: 4 Emperor, 7 Chariot, 8 Strength, 9 Hermit, 16 Tower, 20 Judgement and 21 World, with semantic drift on 6 Lovers. Cards 5, 10, 12, 17 and 18 are close to the original. Recommended: rewrite in the doctrine's voice while keeping the six-field structure, then echo the user's intent inside `intentReflection` (offline and deterministic). Not recommended: AI-written readings (Pages cannot hide a key, and intents would leave the browser). After the English text, ja/ru/is need the same rewrite.
+2. Possible later improvements: a frame table for common enclosing kanji (口 日 田 国 門), and denser compression for 15+ letter intentions.
+
+Earlier pending item: test language switching on the forge and Tarot screens. Try `V` for The Fool, switch between 日本語, Русский, and Íslenska, and open the original reading. Remaining Tarot work includes translation review, browser checks, and audio rights and design.

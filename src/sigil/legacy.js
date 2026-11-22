@@ -1,9 +1,3 @@
-export function reduceLegacyIntent(intent) {
-  if (!intent.trim()) return [];
-  const letters = [...new Set(intent.toUpperCase().match(/[A-Z]/g))];
-  return letters.length ? letters : ['X'];
-}
-
 // The original 600 × 600 renderer. All geometry depends on letter count and randomness.
 export function forgeLegacySigil({ letters }, random = Math.random) {
   const canvas = document.createElement('canvas');
