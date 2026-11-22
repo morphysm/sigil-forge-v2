@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="360" viewBox="0 0 240 360" role="img" aria-labelledby="title description">
+  <title id="title">Strength</title>
+  <desc id="description">A figure with an infinity symbol overhead reaches gently toward a neon-green lion's jaws.</desc>
+  <rect width="240" height="360" fill="#000000"/>
+
+  <g id="lion" fill="none" stroke="#00FF41" stroke-width="5" stroke-linejoin="bevel">
+    <path d="M53 190 69 160 100 147 119 157 138 145 160 164 156 178 179 188 186 202 158 206 175 221 153 229 139 220 119 237 100 250 68 240Z"/>
+    <path d="M69 160 77 193 65 211 M100 147 96 175 81 195 92 222 100 250 M119 157 114 191 101 209 113 231 M139 220 128 197 139 181"/>
+    <path d="M147 188 157 185 M158 206 145 205"/>
+  </g>
+
+  <g id="figure" fill="none" stroke="#F8F4E7" stroke-width="3.5" stroke-linejoin="bevel">
+    <path id="infinity" d="M173 89 159 78 149 82 145 90 152 97 161 98 173 89 185 79 194 80 201 87 197 95 187 99Z"/>
+    <path id="profile" d="M187 131 184 119 173 113 165 118 166 125 161 129 171 136 178 134"/>
+    <path id="back" d="M185 137 197 145 214 164 216 185 211 209"/>
+    <path id="upper-arm" d="M197 145 183 160 181 181 175 187 168 187"/>
+    <path id="lower-arm" d="M197 145 201 179 192 203 178 219 170 223"/>
+  </g>
+</svg>

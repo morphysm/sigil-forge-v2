@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="360" viewBox="0 0 240 360" role="img" aria-labelledby="title description">
+  <title id="title">The Empress</title>
+  <desc id="description">A neon-green figure reclines on a throne with a raised scepter, a crown of stars, wheat, and a heart-shaped Venus shield.</desc>
+  <rect width="240" height="360" fill="#000000"/>
+
+  <g id="throne" fill="none" stroke="#F8F4E7" stroke-width="3.5" stroke-linejoin="bevel">
+    <path d="M73 162 65 172 75 218H154L158 236H79L75 218"/>
+    <path d="M80 236V246 M154 236V246"/>
+  </g>
+  <path id="scepter" fill="none" stroke="#F8F4E7" stroke-width="3.5" stroke-linejoin="bevel" d="M70 118 75 162 M69 105 75 110 70 118 64 112Z"/>
+
+  <g id="empress" fill="none" stroke="#00FF41" stroke-width="5" stroke-linejoin="bevel">
+    <path id="head" d="M89 132 100 124 113 131 111 142 102 147 94 142Z"/>
+    <path id="torso" d="M102 147 112 176"/>
+    <path id="arms" d="M105 157 91 170 73 150 M106 159 127 158 138 182"/>
+    <path id="robe" d="M112 176 142 185 156 204 173 213H89Z M141 195 149 204"/>
+  </g>
+
+  <g id="regalia" fill="none" stroke="#F8F4E7" stroke-width="3.5" stroke-linejoin="bevel">
+    <path id="diadem" d="M89 118 101 113 113 118"/>
+    <g id="venus-shield" transform="translate(5 1)">
+      <path d="M183 235 192 228 200 230 205 237 203 246 183 264 163 246 161 237 166 230 174 228Z"/>
+      <path stroke-width="2.4" d="M183 236 188 239 188 244 183 247 178 244 178 239Z M183 247V256 M179 252H187"/>
+    </g>
+  </g>
+  <path id="stars" fill="#F8F4E7" d="M89 102 91 106 95 108 91 110 89 114 87 110 83 108 87 106Z M101 94 103 99 108 101 103 103 101 108 99 103 94 101 99 99Z M113 102 115 106 119 108 115 110 113 114 111 110 107 108 111 106Z"/>
+
+  <g id="wheat" fill="none" stroke="#F8F4E7" stroke-width="3.5" stroke-linejoin="bevel">
+    <path d="M47 249 49 198 47 190 M48 225 39 216 38 208 M48 221 57 212 58 204 M49 212 42 204 41 198 M49 208 55 201 56 194"/>
+    <path d="M197 214 195 171 197 162 M196 203 187 195 185 187 M196 198 204 189 205 181 M195 189 188 181 187 174 M195 185 202 177 203 170"/>
+  </g>
+</svg>

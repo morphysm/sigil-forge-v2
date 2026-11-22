@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="360" viewBox="0 0 240 360" role="img" aria-labelledby="title description">
+  <title id="title">Justice</title>
+  <desc id="description">A crowned figure sits between two pillars, holding an upright green sword and level scales.</desc>
+  <rect width="240" height="360" fill="#000000"/>
+
+  <g id="throne" fill="none" stroke="#F8F4E7" stroke-width="3.5" stroke-linejoin="bevel">
+    <path d="M28 109H46 M37 109V243 M28 243H46 M194 109H212 M203 109V243 M194 243H212"/>
+    <path d="M77 241V217H90 M150 217H163V241"/>
+  </g>
+
+  <g id="figure" fill="none" stroke="#F8F4E7" stroke-width="4" stroke-linejoin="bevel">
+    <path id="crown" d="M107 119V106L114 111 120 103 126 111 133 106V119Z"/>
+    <path id="face" d="M110 119V134L120 142 130 134V119"/>
+    <path id="arms" d="M111 148 101 154 89 177 69 163 M129 148 139 154 154 172 174 163"/>
+    <path id="robe" d="M101 154 102 183 96 197 86 238H154L144 197 138 183 139 154 M119 200 112 228"/>
+    <path id="foot" d="M130 238V247H143"/>
+  </g>
+
+  <g id="sword" fill="none" stroke="#00FF41" stroke-width="4.5" stroke-linejoin="bevel">
+    <path d="M62 151V110L69 95 76 110V151 M54 151H84 M69 151V175 M64 175H74"/>
+  </g>
+
+  <g id="scales" fill="none" stroke="#00FF41" stroke-width="3.5" stroke-linejoin="bevel">
+    <path d="M174 163V181 M151 181H197 M159 181 152 201 M159 181 166 201 M189 181 182 201 M189 181 196 201"/>
+    <path d="M150 201H168L164 207H154Z M180 201H198L194 207H184Z"/>
+  </g>
+</svg>

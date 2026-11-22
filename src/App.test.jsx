@@ -202,6 +202,18 @@ test('audio failure leaves the card readable and unmount pauses the player', asy
   expect(audio.pause).toHaveBeenCalledTimes(1);
 });
 
+test('Spiral lettering switches the visible drawing and restores the original', async () => {
+  typeIntent('LETSIAGNRDO');
+  await act(async () => click('[ EXECUTE.REDUCTION ]'));
+  click('[ FORGE SIGIL ]');
+  const paths = () => [...container.querySelectorAll('.monogram__plate path')].map(path => path.getAttribute('d'));
+  const original = paths();
+  click('Spiral lettering');
+  expect(paths().length).toBeGreaterThan(original.length);
+  click('Spiral lettering');
+  expect(paths()).toEqual(original);
+});
+
 test('Monogram forges mixed scripts, replays construction, varies geometry and carries the same card into resonance', async () => {
   typeIntent('AЖÞ日');
   await act(async () => click('[ EXECUTE.REDUCTION ]'));
