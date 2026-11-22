@@ -23,6 +23,17 @@ const frames = {
   Ш: [[2.5, 5, 3.4, 7], [7.5, 5, 3.4, 7]],
   Q: [[5, 5, 5.4, 5.4]],
   G: [[4.2, 5, 3.6, 5.2]],
+  // Enclosing kanji, measured on the normalized stroke data. Kanji whose
+  // interior is already filled (国, 図, 園, 間, 問) are not used as frames.
+  口: [[5, 4.45, 6.4, 6]],
+  囗: [[5, 5, 6.8, 6.8]],
+  回: [[5.1, 5.1, 2.6, 2.6]],
+  日: [[5, 2.5, 5.6, 3.4], [5, 7.5, 5.6, 3.4]],
+  目: [[5, 1.67, 5.8, 2.2], [5, 5, 5.8, 2.2], [5, 8.33, 5.8, 2.2]],
+  田: [[2.5, 2.5, 3.4, 3.4], [7.5, 2.5, 3.4, 3.4], [2.5, 7.5, 3.4, 3.4], [7.5, 7.5, 3.4, 3.4]],
+  門: [[5, 7.2, 4.4, 4.4]],
+  月: [[5.6, 1.5, 4.6, 2], [5.6, 4.6, 4.6, 2.2]],
+  円: [[2.6, 2.4, 3, 3.2], [7.2, 2.4, 3, 3.2], [5, 7.4, 6.4, 3.6]],
 };
 const rank = Object.keys(frames);
 // Cyrillic letters drawn with the same template as a Latin frame.
@@ -73,6 +84,40 @@ function coverage(host, guest) {
     }
   }
   return carriers;
+}
+
+// How many segments two letters share when drawn in the same box. Letters that
+// share strokes (N and H, B and R) fuse into one mark with little added ink.
+function sharedSegments(a, b) {
+  const lies = (points, i, host) => host.strokes.some(({ points: line }) => line.slice(1).some((end, j) => (
+    segmentDistance(points[i - 1], line[j], end) < 0.06 && segmentDistance(points[i], line[j], end) < 0.06
+  )));
+  const count = (guest, host) => guest.strokes.reduce((sum, { points }) => sum
+    + points.slice(1).filter((_, i) => lies(points, i + 1, host)).length, 0);
+  return count(a, b) + count(b, a);
+}
+
+// Fuse letters into at most `cells` groups, merging the pairs that share the
+// most strokes first, as Spare overlays letters in one compact mark.
+function fuse(letters, glyphs, cells) {
+  const groups = letters.map(index => [index]);
+  const limit = Math.ceil(letters.length / cells);
+  const score = (a, b) => a.reduce((sum, i) => sum + b.reduce((total, j) => total
+    + sharedSegments(glyphs[i], glyphs[j]), 0), 0);
+  while (groups.length > cells) {
+    let best = null;
+    for (let i = 0; i < groups.length; i++) {
+      for (let j = i + 1; j < groups.length; j++) {
+        if (groups[i].length + groups[j].length > limit) continue;
+        const value = score(groups[i], groups[j]);
+        if (!best || value > best.value) best = { i, j, value };
+      }
+    }
+    if (!best) break;
+    groups[best.i].push(...groups[best.j]);
+    groups.splice(best.j, 1);
+  }
+  return groups;
 }
 
 function turn(a, b, c) {
@@ -139,7 +184,7 @@ function place(glyph, [cx, cy, w, h]) {
 
 function chooseFrame(glyphs, variant) {
   const listed = rank.flatMap(key => glyphs.flatMap((glyph, index) => (
-    frameKey(glyph.letter) === key && !isJapaneseLetter(glyph.letter) ? [index] : []
+    frameKey(glyph.letter) === key ? [index] : []
   )));
   const candidates = listed.length
     ? listed
@@ -159,7 +204,7 @@ function chunk(list, size) {
 
 export function inscribeStrokes(glyphs, variant = 0) {
   const { frame, rotation } = chooseFrame(glyphs, variant);
-  const boxes = !isJapaneseLetter(glyphs[frame].letter) ? frames[frameKey(glyphs[frame].letter)] ?? [] : [];
+  const interior = frames[frameKey(glyphs[frame].letter)] ?? [];
 
   // Spare's reduction: a letter already contained in a larger one is not redrawn.
   const hosts = [frame];
@@ -173,6 +218,8 @@ export function inscribeStrokes(glyphs, variant = 0) {
   }
   const remaining = rotate(glyphs.map((glyph, index) => index)
     .filter(index => index !== frame && !absorbed.has(index)), rotation);
+  // With spare boxes, variations also move the letters to other boxes.
+  const boxes = remaining.length < interior.length ? rotate(interior, rotation) : interior;
 
   // One letter per interior box. Long intentions pair letters in boxes wide
   // enough to hold two, as in Spare's doubled S.
@@ -243,7 +290,10 @@ export function inscribeStrokes(glyphs, variant = 0) {
   for (const [side, letters] of Object.entries(sides)) {
     if (!letters.length) continue;
     const direction = side === 'above' ? -1 : 1;
-    const levels = chunk(letters, letters.length <= 3 ? 1 : letters.length <= 8 ? 2 : 3);
+    // At most two levels of at most two cells. Long intentions fuse letters
+    // that share strokes into one cell instead of growing a taller stack.
+    const perLevel = letters.length <= 2 ? 1 : 2;
+    const levels = chunk(fuse(letters, glyphs, Math.min(letters.length, perLevel * 2)), perLevel);
     const edge = side === 'above' ? ink.top : ink.bottom;
     const spineSources = [...letters];
     const spine = add([], WIDTH.spine, spineSources, { ends: [], scale: 1 });
@@ -251,9 +301,9 @@ export function inscribeStrokes(glyphs, variant = 0) {
     levels.forEach((level, depth) => {
       const cy = edge + direction * (GAP + MARK / 2 + depth * (MARK + GAP));
       const span = level.length * MARK + (level.length - 1) * 0.3;
-      level.forEach((index, i) => {
+      level.forEach((cell, i) => {
         const cx = axis - span / 2 + MARK / 2 + i * (MARK + 0.3);
-        drawGlyph({ index, role: 'mark', ...place(glyphs[index], [cx, cy, MARK * 0.9, MARK]) });
+        cell.forEach(index => drawGlyph({ index, role: 'mark', ...place(glyphs[index], [cx, cy, MARK * 0.9, MARK]) }));
       });
       far = cy + direction * MARK / 2;
     });

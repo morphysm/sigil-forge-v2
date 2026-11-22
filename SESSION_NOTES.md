@@ -75,6 +75,11 @@ The original application is preserved at commit `7722b72`. This checkpoint saves
    - `expanded.en.js` restores the March doctrine's voice: the `legacy.*.js` meaning, Morphystic terms, commands as closings, and no "X can help… It can also…" formula. The "Your intent" section is removed from the reading display.
    - `expanded.ja.js`, `expanded.ru.js` and `expanded.is.js` translate the new English text, using the March terminology (デミウルゴス / Демиург / Demíúrginn, the Prison Loop, Wyrmos, the mirror, the void). Japanese uses plain style with せよ imperatives. Russian uses ты, with gender-neutral phrasing. Icelandic uses þú. Only the six text fields changed; names, themes and `artAlt` are untouched.
    - **Needs native-speaker review**, especially the Icelandic grammar.
-2. Possible later improvements: a frame table for common enclosing kanji (口 日 田 国 門), and denser compression for 15+ letter intentions.
+2. **Kanji frames and compact long intents: done, committed and deployed (2026-11-22).** In `inscribed.js`:
+   - Enclosing kanji 口 囗 回 日 目 田 門 月 円 are frames, with interior boxes measured on the stroke data. 国, 図, 園, 間 and 問 are excluded because their interior is already filled.
+   - Axis marks use at most 2 levels per side of at most 2 cells. Overflow letters are fused into one cell, pairing first the letters that share the most strokes (`fuse`, `sharedSegments`).
+   - When a frame has spare boxes, variations move the letters between boxes.
+   - Contact sheet: `art/monogram-studies/inscribed-kanji-long.png`. All 149 tests pass. A one-letter frame such as 口本 has nothing to vary.
+
 
 Earlier pending item: test language switching on the forge and Tarot screens. Try `V` for The Fool, switch between 日本語, Русский, and Íslenska, and open the original reading. Remaining Tarot work includes translation review, browser checks, and audio rights and design.

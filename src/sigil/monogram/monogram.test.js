@@ -101,6 +101,39 @@ test('each variation changes the drawing and repeats exactly', () => {
   }
 });
 
+test('enclosing kanji frame the other characters, and spare boxes vary', () => {
+  const result = generate('日本語');
+  const [frame] = result.paths;
+  expect(frame.sources.map(index => result.letters[index])).toEqual(['日']);
+  const bounds = path => {
+    const points = coordinates(path);
+    return [Math.min(...points.map(([x]) => x)), Math.max(...points.map(([x]) => x)),
+      Math.min(...points.map(([, y]) => y)), Math.max(...points.map(([, y]) => y))];
+  };
+  const frameBox = result.paths.filter(path => path.sources.includes(0)).map(bounds)
+    .reduce(([l, r, t, b], [l2, r2, t2, b2]) => [Math.min(l, l2), Math.max(r, r2), Math.min(t, t2), Math.max(b, b2)]);
+  // Every stroke of 本 and 語 lies inside the frame's outline.
+  for (const path of result.paths.filter(({ sources }) => !sources.includes(0))) {
+    const [l, r, t, b] = bounds(path);
+    expect(l >= frameBox[0] && r <= frameBox[1] && t >= frameBox[2] && b <= frameBox[3]).toBe(true);
+  }
+  checkPaths(result);
+  const field = [0, 1, 2].map(variant => generate('田中', { variant }).paths);
+  expect(new Set(field.map(paths => JSON.stringify(paths))).size).toBe(3);
+});
+
+test('long intentions stay compact by fusing letters into at most two mark levels per side', () => {
+  const result = generate('This my wish to obtain the strength of a tiger');
+  const [frame] = result.paths;
+  const ys = paths => paths.flatMap(path => coordinates(path).map(([, y]) => y));
+  const frameYs = ys(result.paths.filter(path => path.width === frame.width));
+  const allYs = ys(result.paths);
+  const height = values => Math.max(...values) - Math.min(...values);
+  // The frame spans 10 units and each side adds at most two 2.1-unit levels with gaps.
+  expect(height(allYs) / height(frameYs)).toBeLessThan(2.4);
+  checkPaths(result);
+});
+
 test('native glyph processing covers the advertised alphabets, halfwidth kana and Japanese voicing', () => {
   const native = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÁÐÉÍÓÚÝÞÆÖАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯЄІЇҐЎЈЅЉЊЏ';
   const { glyphs, unsupported } = resolveGlyphs([...native], japanese);
