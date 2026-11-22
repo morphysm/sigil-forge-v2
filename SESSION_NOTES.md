@@ -48,7 +48,7 @@ The original application is preserved at commit `7722b72`. This checkpoint saves
 ## Repository layout (keep the versions apart)
 
 - This folder is **v2 only**. Its only remote is `forge-v2` = `git@github.com:morphysm/sigil-forge-v2.git`. Local branch `v2` tracks `forge-v2/main`, and `push.default=upstream`, so a plain `git push` publishes to sigil-forge-v2 `main`.
-- The March version lives only in `morphysm/sigil-forge` on GitHub (`main` and `gh-pages`, site `https://morphysm.github.io/sigil-forge/`). It is frozen. To work on it, clone it into a separate folder; never add it as a remote here.
+- The March version lives only in `morphysm/sigil-forge` on GitHub (`main` and `gh-pages`, site `https://morphysm.github.io/sigil-forge/`). It is frozen. Its local copy is `~/Documents/sigil-forge-march` (cloned 2026-11-22, `main` at `14f9f61`, `npm install` not run yet). Never add it as a remote here.
 - Cleanup on 2026-11-22: deleted the stale `v2` branch from the March repo (all its commits were already in sigil-forge-v2 `main`), deleted local branches `main` (outdated March copy) and `v2-setup-backup` (a one-line README from creating the repo), removed the `origin` remote, set `core.fileMode false` (the files had picked up executable flags from copying), and ignored `.serena/`.
 - In this sandbox `.git/config` is write-protected, so git config changes and SSH push/fetch must run outside it.
 
