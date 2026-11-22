@@ -71,10 +71,10 @@ The original application is preserved at commit `7722b72`. This checkpoint saves
 
 ## Exact next step
 
-1. **Tarot reading rewrite: English done, not committed.**
-   - `src/i18n/locales/expanded.en.js`: all 22 cards rewritten in the March doctrine's voice (the `legacy.en.js` meaning restored, Morphystic terms back, commands as closings, no "X can help… It can also…" formula). The six-field structure, names, themes and `artAlt` are unchanged.
-   - The "Your intent" section was removed from the reading at the user's request (the quote and reflection are gone, and the `tarotIntent` label is gone in all 4 locales). The `intentReflection` text stays in the reading files but is not displayed.
-   - Next: the user reviews the English text in the browser, then commit and `npm run deploy`. Then rewrite `expanded.ja.js`, `expanded.ru.js` and `expanded.is.js` to match. They still carry the old soft text, so the tone differs by language until then.
+1. **Tarot reading rewrite: done in all 4 languages and deployed (2026-11-22).**
+   - `expanded.en.js` restores the March doctrine's voice: the `legacy.*.js` meaning, Morphystic terms, commands as closings, and no "X can help… It can also…" formula. The "Your intent" section is removed from the reading display.
+   - `expanded.ja.js`, `expanded.ru.js` and `expanded.is.js` translate the new English text, using the March terminology (デミウルゴス / Демиург / Demíúrginn, the Prison Loop, Wyrmos, the mirror, the void). Japanese uses plain style with せよ imperatives. Russian uses ты, with gender-neutral phrasing. Icelandic uses þú. Only the six text fields changed; names, themes and `artAlt` are untouched.
+   - **Needs native-speaker review**, especially the Icelandic grammar.
 2. Possible later improvements: a frame table for common enclosing kanji (口 日 田 国 門), and denser compression for 15+ letter intentions.
 
 Earlier pending item: test language switching on the forge and Tarot screens. Try `V` for The Fool, switch between 日本語, Русский, and Íslenska, and open the original reading. Remaining Tarot work includes translation review, browser checks, and audio rights and design.
