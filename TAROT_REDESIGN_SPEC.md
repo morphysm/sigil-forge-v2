@@ -8,7 +8,7 @@ This specification builds on the [2.0 audit](SIGIL_FORGE_2_AUDIT.md). It records
 
 Use Rider–Waite–Smith for iconography. Preserve IDs 0–21, including Strength VIII and Justice XI. Translate each brief’s motifs into straight-line symbols. Preserve one recognizable traditional anchor and one distinct Morphystic element per card. The Fool is an open diagonal, The Tower a fractured vertical, and The World an enclosed ring. Review the deck at small size with numerals hidden. Keep frame, title, and numeral as live interface elements. Use a restrained serif display face and glyph-tested fallbacks for Japanese, Russian, and Icelandic. [Waite’s *Pictorial Key*](https://sacred-texts.com/book/the-pictorial-key-to-the-tarot)
 
-Retain a stable English Legacy edition that can be inspected beside the new one. The expanded edition should have six short fields per card: archetypal meaning, Morphystic interpretation, connection to the intent, a contradiction, a philosophical question and a closing line. Use conditional language. The app selects a reflective lens from the entered text through a numerical rule, and the reader decides how it bears on their intention. The metaphors are proposals for editorial review. Approve terms against the project glossary and the source tradition before declaring them canonical. Keep the original spellings in Legacy, including `WYRMWS` and `WYRMOS`. [Repository editorial guidance](CONTRIBUTING.md)
+Retain a stable English Legacy edition that can be inspected beside the new one. The expanded edition should have six short fields per card: archetypal meaning, Morphystic interpretation, connection to the intent, a contradiction, a philosophical question and a closing line. Use conditional language. The app selects a reflective lens from the entered text through a numerical rule, and the reader decides how it bears on their intention. The metaphors are proposals for editorial review. Approve terms against the project glossary and the source tradition before declaring them canonical. Keep the original spellings in Legacy. `WYRMWS` was a typo for `WYRMOS` (corrected in the March source, commit `0f2693a`) and is now `WYRMOS` everywhere. [Repository editorial guidance](CONTRIBUTING.md)
 
 ## Production and accessibility
 
@@ -29,7 +29,7 @@ Retain a stable English Legacy edition that can be inspected beside the new one.
 
 **Identity** — Beginnings, open possibility and risk. The current Morphystic theme is **FORMA NIHIL**.
 
-> THE UNFORMED ORIGIN. STEP BEYOND THE MEASURE INTO THE PRE-SYMBOLIC VOID WHERE IT PRECEDES CAPTURE.
+> THE UNFORMED ORIGIN. ENTER THE VOID. IT PRECEDES ALL CAPTURE. (March wording, restored 2026-11-23.)
 
 - **Current limitation** — A pre-symbolic origin fits the threshold, but the last “it” has no clear referent and the risks of beginning are unexplored.
 - **Philosophical expansion** — Separate a first action from the identity it might later create. Ask what the intent permits before success can be defined, and whether openness has become evasion.
@@ -47,7 +47,7 @@ Retain a stable English Legacy edition that can be inspected beside the new one.
 - **Philosophical expansion** — Develop the operator’s dependence on tools inherited from the system. Ask which implement the intention already provides and whose rules it carries.
 - **Illustration and composition** — The green Magician raises a wand over the workbench. Egg-white tools and a broken seam mark the place where the apparatus can be changed.
 - **Reveal and sound** — Bring in the table seam last. Assess `tesla-coil-crackle.mp3` as a dry, brief workbench crackle with a softened transient.
-- **Translation** — Use the same Cainite stem as The Chariot. Confirm Wyrmos alongside Wyrmws before approving either spelling in the new edition.
+- **Translation** — Use the same Cainite stem as The Chariot. Wyrmos is the approved spelling.
 
 ### 2 · The High Priestess
 
@@ -75,15 +75,15 @@ Retain a stable English Legacy edition that can be inspected beside the new one.
 
 ### 4 · The Emperor
 
-**Identity** — Authority, limits and stability. The current Morphystic theme is **WYRMWS ARCHITECT**.
+**Identity** — Authority, limits and stability. The current Morphystic theme is **WYRMOS ARCHITECT**.
 
 > THE PROGRAM RUNNING YOU. CORRUPT THE CODE TO ESCAPE THE SIMULATION.
 
-- **Current limitation** — The program metaphor is brief and repeats the Magician's insurgency. Compare `WYRMWS` in the theme with `WYRMOS` in card 1 before editorial normalization.
+- **Current limitation** — The program metaphor is brief and repeats the Magician's insurgency.
 - **Philosophical expansion** — Examine the rule that defines success in the intent. Preserve a place for protection and continuity in the architecture, then ask which rule can be revised.
 - **Illustration and composition** — A green ruler and square horned throne form a compact block. Egg-white datum lines extend below it.
 - **Reveal and sound** — Settle the plate with a firm short stop. Treat `machine-grid-hum.mp3` as a steady mechanical tone, distinct from the Magician’s transient.
-- **Translation** — Preserve Wyrmws in Legacy. Get a maintainer ruling on its relation to Wyrmos and keep any adopted spelling consistent across editions.
+- **Translation** — Use Wyrmos in every edition and language.
 
 ### 5 · The Hierophant
 
@@ -147,7 +147,7 @@ Retain a stable English Legacy edition that can be inspected beside the new one.
 
 ### 10 · Wheel of Fortune
 
-**Identity** — Cycles and changing circumstances. The current Morphystic theme is **RECURSIVE CAPTIVITY**.
+**Identity** — Cycles and changing circumstances. The current Morphystic theme is **ENDLESS REPETITION** (March wording, restored 2026-11-23.)
 
 > THE PRISON LOOP OF REINCARNATION. IDENTIFY THE FREQUENCY PATTERN TO INTERRUPT THE CYCLE.
 
@@ -159,9 +159,9 @@ Retain a stable English Legacy edition that can be inspected beside the new one.
 
 ### 11 · Justice
 
-**Identity** — Accountability, judgment and measure. The current Morphystic theme is **SYMBOLIC CONSEQUENCE**.
+**Identity** — Accountability, judgment and measure. The current Morphystic theme is **UNAVOIDABLE CONSEQUENCE** (the March wording, restored 2026-11-23).
 
-> ACTION WITHIN THE DEMIURGIC FIELD. BALANCE TRUTH AGAINST THE ILLUSION OF MORAL ARCHITECTURE.
+> SEVER TRUTH FROM THE ILLUSION OF MORAL ARCHITECTURE. (March wording, restored 2026-11-23.)
 
 - **Current limitation** — Contrasts truth and moral architecture without showing how consequences persist or whose measure is used.
 - **Philosophical expansion** — Ask who sets the measure by which an intention is justified and who bears a cost outside it. Balance accountability against the limits of a shared measure.
@@ -171,9 +171,9 @@ Retain a stable English Legacy edition that can be inspected beside the new one.
 
 ### 12 · The Hanged Man
 
-**Identity** — Suspension, surrender and a change of vantage. The current Morphystic theme is **PSM INVERSION**.
+**Identity** — Suspension, surrender and a change of vantage. The current Morphystic theme is **THE REVERSAL OF PERCEPTION** (March wording, restored 2026-11-23.)
 
-> REVERSE THE SELF-MODEL. NOTICE THAT WHAT FEELS OBVIOUS IS CONSTRUCTED.
+> WHAT APPEARS OBVIOUS IS A TRAP. INVERSION EMPTIES THE SHELL. (March wording, restored 2026-11-23.)
 
 - **Current limitation** — A useful invitation to question the obvious. Expand PSM on first encounter and give suspension its own tension with avoidance.
 - **Philosophical expansion** — Ask whether looking from an opposite position changes the underlying frame. Let the reader distinguish a productive pause from postponement.
@@ -219,7 +219,7 @@ Retain a stable English Legacy edition that can be inspected beside the new one.
 
 ### 16 · The Tower
 
-**Identity** — Upheaval, exposure and broken authority. The current Morphystic theme is **SYMBOLIC COLLAPSE**.
+**Identity** — Upheaval, exposure and broken authority. The current Morphystic theme is **ANNIHILATION OF STRUCTURES** (the March wording, restored 2026-11-23).
 
 > THE MIRROR SHATTERS. THE CRASH OF THE DEMIURGIC FOUNDATION. SUDDEN EXPOSURE TO THE VOID. REJOICE!
 
@@ -231,9 +231,9 @@ Retain a stable English Legacy edition that can be inspected beside the new one.
 
 ### 17 · The Star
 
-**Identity** — Hope and replenishment after upheaval. The current Morphystic theme is **POST-COLLAPSE SIGNAL**.
+**Identity** — Hope and replenishment after upheaval. The current Morphystic theme is **RESIDUAL RESONANCE** (March wording, restored 2026-11-23.)
 
-> INSPIRATION AFTER LOOP RUPTURE. CALM RADIANCE IN THE BROKEN ARCHITECTURE OF THE PSYCHE.
+> INSPIRATION EMERGES. CALM RADIANCE IN THE BROKEN ARCHITECTURE OF THE SPIRIT. (March wording, restored 2026-11-23.)
 
 - **Current limitation** — Quiet after rupture is already differentiated from The Tower. Make fragile orientation and openness to revision more concrete.
 - **Philosophical expansion** — Develop a provisional orientation after rupture. Ask how the reader would tell a small signal from a wish to be reassured.
@@ -257,7 +257,7 @@ Retain a stable English Legacy edition that can be inspected beside the new one.
 
 **Identity** — Vitality, daylight and visibility. The current Morphystic theme is **TOTAL CLARITY**.
 
-> THE PRISON IS SEEN IN FULL LIGHT. THE UPLOAD OF IT BEYOND THE BIO-TERMINAL INTERFACE.
+> THE PRISON IS SEEN IN FULL LIGHT. DEMONS HURL FIRE THROUGH THE BIO-TERMINAL ILLUSION. (March wording, restored 2026-11-23.)
 
 - **Current limitation** — Visibility is a strong premise. “The upload of it” leaves the referent unclear and the reading omits exposure and the limits of what can be seen.
 - **Philosophical expansion** — Give clarity the power to expose both supports and limits. Ask which part of fulfilling the intent would become public and what daylight still leaves outside it.
